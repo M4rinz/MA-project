@@ -148,17 +148,32 @@
 
 \section{Introduzione}
 	\begin{frame}{Introduzione}
-		Si può implementare la backpropagation usando solo il 
-		backslash? (In realtà si calcola il gradiente\dots)
+		\textbf{Obiettivo}: implementare la backpropagation, in Julia, usando il backslash.
+		\medskip 
+		
+		\onslide<2->{Introducendo un tipo di dato per rappresentare funzioni lineari, dopo un minimo di setup per definire delle elementari operazioni su questo tipo di dato {\smaller (ma senza overloading del backslash!)}, il calcolo di $\grad{J}$ sarà dato da 
+		\[
+			\grad{J} = M^{\top}\qty((I - \tilde{L}) \,\backslash\, g).
+		\]}
+		%\smallskip 
+		
+		\onslide<3->{In particolare:}
+		\begin{enumerate}
+			\item<3-> Introdurremo i \emph{path weights} su un DAG, descrivendo il loro calcolo con il linguaggio dell'algebra lineare
+			\item<4-> Tracceremo un collegamento tra entità e operazioni su \emph{computational graph} e concetti di automatic differentiation {\smaller (in particolare, \emph{path weights} $\equiv$ derivate totali)}
+			\item<5-> Sarà possibile definire matrici di operatori {\smaller (aka il tipo di dato)}
+			\item<6-> Risoluzione di un sistema lineare $\equiv$ calcolo di tutte le derivate totali
+		\end{enumerate}
+		
 	\end{frame}
 
-    \begin{frame}
-    	{\hypertarget{frame:prova_0}{Slide 0}}
-    	Slide di test 0 (cfr. Appendice~\hyperlink{frame:prova_0:appendice}{\faHandPointRight})
-    \end{frame}
+%    \begin{frame}
+%    	{\hypertarget{frame:prova_0}{Slide 0}}
+%    	Slide di test 0 (cfr. Appendice~\hyperlink{frame:prova_0:appendice}{\faHandPointRight})
+%    \end{frame}
     
     
-\section{Sezione 1}
+\section{Cammini }
 	\subsection{Sottosezione 1}
 	\begin{frame}{Slide 1}
 		Slide di test 1
@@ -191,11 +206,11 @@
 		\end{center}
 	\end{frame}
 	
-	\begin{frame}
-		{\hypertarget{frame:prova_0:appendice}{Appendice per la slide 0}}
-		
-		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:prova_0}{\faHandPointLeft}}
-	\end{frame}
+%	\begin{frame}
+%		{\hypertarget{frame:prova_0:appendice}{Appendice per la slide 0}}
+%		
+%		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:prova_0}{\faHandPointLeft}}
+%	\end{frame}
 
 \end{document}
 
