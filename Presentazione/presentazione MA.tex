@@ -15,11 +15,16 @@
 %\usepackage{braket} 					% Per il comando \Set, e altre (poche) cose
 %\usepackage{textcomp}					% Dovrebbe aggiungere più simboli
 
+\usepackage{algorithm}                  % Definisce l'ambiente algorithm (ha numero e didascalia)
+\usepackage[beginLComment=//~,endLComment=~]{algpseudocodex} % Per scrivere pseudocodice
+
 \usepackage{relsize}					% Per usare \mathbigger{} ecc
 
 \usepackage{multirow}					% per usare il comando multirow
 \usepackage{tabularx}					% per fare tabelle. Carica il pacchetto array, per gli array.
 \usepackage{arydshln}					% per le linee tratteggiate nelle tabelle
+
+\usepackage{nicematrix}
 
 %\usepackage[rightcaption]{sidecap}		% Per mettere le didascalie di lato
 
@@ -64,6 +69,10 @@
 	\let\thefootnote\relax\footnotetext{#1}%
 	\let\thefootnote\svthefootnote%
 }
+
+% Rinomina i "Require" ed "Ensure" dei listings creati con algorithmicx
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
 
 
 	% ------ COLORI CUSTOM ------
@@ -148,13 +157,16 @@
 
 \section{Introduzione}
 	\begin{frame}{Introduzione}
+		\textcolor{red}{\textbf{Da aggiustare}}
+		
 		\textbf{Obiettivo}: implementare la backpropagation, in Julia, usando il backslash.
 		\medskip 
 		
 		\onslide<2->{Introducendo un tipo di dato per rappresentare funzioni lineari, dopo un minimo di setup per definire delle elementari operazioni su questo tipo di dato {\smaller (ma senza overloading del backslash!)}, il calcolo di $\grad{J}$ sarà dato da 
 		\[
-			\grad{J} = M^{\top}\qty((I - \tilde{L}) \,\backslash\, g).
-		\]}
+			\grad{J} = M^{\top}\qty((I - \tilde{L}) \,\backslash\, g)
+		\]
+		dove $M$ e $\tilde{L}$ sono matrici che hanno operatori come elementi.}
 		%\smallskip 
 		
 		\onslide<3->{In particolare:}
@@ -173,16 +185,237 @@
 %    \end{frame}
     
     
-\section{Cammini }
-	\subsection{Sottosezione 1}
-	\begin{frame}{Slide 1}
-		Slide di test 1
+\section{Cammini, \emph{path weights} su DAG}
+	\subsection{Definizioni e prime proprietà}
+	\begin{frame}{Definizioni $\qquad 1/2$}{\emph{Path products} e \emph{path weights}}
+		Consideriamo un DAG {\smaller (connesso!)} $\mathcal{G}$ e un cammino {\smaller (orientato!)} su $\mathcal{G}$.
+		
+		\begin{definizione}<2->
+			Il \alert{path product} di un cammino su $\mathcal{G}$ è dato dal prodotto dei pesi degli archi che lo costituiscono
+		\end{definizione}
+		
+		\onslide<3->{Assumiamo che in $\mathcal{G}$ non vi siano self loops. D'ufficio, il path product da un qualsiasi nodo a sé stesso è $1$.}
+		
+		\begin{definizione}<4->
+			Un \alert{path weight} su $\mathcal{G}$ è il path product di un cammino da un nodo sorgente a un nodo pozzo
+		\end{definizione}
+		\medskip	
+	
+		\begin{oss}<5->
+			Il ``prodotto'' è da intendersi nel senso di teoria dei gruppi. 
+		\end{oss}
+
 	\end{frame}
 	
-	\subsection{Sottosezione 2}
-	\begin{frame}{Slide 2}
-		Slide di test 2
+	\begin{frame}{Definizioni $\qquad 2/2$}{Matrice di adiacenza}
+		Abuso di notazione: un nodo viene identificato con la sua etichetta $i\in[n]$%\coloneqq\qty{1,\dots,n}$.
+		
+		\begin{definizione}
+			La \alert{matrice di adiacenza} $L$ di $\mathcal{G}$ è data da:
+			\[
+				\R{n}{n}\ni (L^{\top})_{i,j}= 
+				\begin{dcases*}
+					0 & {\smaller Non esiste un arco $i\to j$}\\
+					w(i,j) & {\smaller Esiste un arco $i\to j$, con peso $w(i,j)$}
+				\end{dcases*}
+			\]
+		\end{definizione}
+		\medskip 
+		
+		\onslide<2->{Ricordiamo che $(L^{\top})^k$ accumula {\smaller ($\equiv$ somma)} i path products di lunghezza $k$:}
+		\onslide<3->{$(L^{\top})^k_{i,j}$ contiene la somma dei pesi di tutti i cammini da $i$ a $j$ di lunghezza $k$.}
+		
+
+		
+		\blankfootnote{$[n]\coloneqq\qty{1,\dots, n}$}
 	\end{frame}
+	
+	\begin{frame}
+		{\hypertarget{frame:path_product_no_top_sort}{Matrice di adiacenza e \emph{path products}}}
+		Se i nodi di $\mathcal{G}$ sono enumerati seguendo un ordinamento topologico, $L^{\top}$ è strettamente triangolare superiore, dunque nilpotente. \onslide<2->{Di conseguenza 
+		\[
+			(I-L^{\top})^{-1}=I + L^{\top} + \dots + (L^{\top})^{n-1}.
+		\]}
+		%\vspace*{-1em}
+		\onslide<3->{\noindent Dunque $(I-L)^{-\!\top}$ contiene tutti i path products massimali, compresi i path weights.}
+		\medskip
+		
+		\onslide<4->{Se i nodi sorgente sono $1,\dots,s$ e i nodi pozzo $n-p+1,\dots,n$, si ha
+		\begin{equation*}\label{eqn:path_weights}
+			\texttt{path\_weights}=
+			\underbrace{
+				\left\lgroup\begin{array}{cc}
+					\multicolumn{2}{c}{\multirow{2}*{$I_s$}}\\
+					& \\
+					\hline
+					\multicolumn{2}{c}{\multirow{2}*{$\mathlarger{0}$}} \\
+					& \\
+				\end{array}\right\rgroup^{\mathllap{\top}}
+			}_{\text{sorgenti}}
+			\!\qty(I - L)^{-\!\top}\!\!
+			\underbrace{
+				\left\lgroup\begin{array}{cc}
+					\multicolumn{2}{c}{\multirow{3}*{$\mathlarger{0}$}} \\
+					& \\
+					& \\
+					\hline
+					\multicolumn{2}{c}{I_p}\\
+				\end{array}\right\rgroup
+			}_{\text{pozzi}}
+		\end{equation*}}
+		\vspace*{-1em}
+		\begin{oss}<5->
+			Il metodo è valido anche senza ordinamento topologico, basta selezionare le righe/colonne corrispondenti alle sorgenti/pozzi (cfr. Appendice~\hyperlink{frame:path_product_no_top_sort:appendice}{\faHandPointRight})
+		\end{oss}
+	\end{frame}
+	
+	% Versione della formula con NiceMatrix (più lenta)
+%	\begin{frame}{title}
+%		\[
+%		\text{path weights}=
+%		\begin{pNiceMatrix}%{cc}
+%			\Block{2-3}<\large>{I_s} & & \\
+%			& & \\
+%			\Hline
+%			\Block{2-3}<\large>{0} & & \\
+%			& & \\
+%			\CodeAfter
+%			\UnderBrace[yshift=2pt]{4-1}{4-3}{\text{\smaller sorgenti}}
+%		\end{pNiceMatrix}^{\mathllap{\top}}
+%		\qty(I - L)^{-\!\top}
+%		\begin{pNiceMatrix}%{cc}
+%			\Block{3-2}<\large>{0} & \\
+%			& \\
+%			& \\
+%			\Hline
+%			\Block{1-2}{I_p} 	   & \\
+%			\CodeAfter
+%			\UnderBrace[yshift=2pt]{5-1}{5-2}{\text{\smaller pozzi}}
+%		\end{pNiceMatrix}
+%		\]
+%	\end{frame}
+
+
+	\begin{frame}{Esempio: DAG completo con quattro nodi}
+		\begin{columns}
+			\begin{column}{0.7\textwidth}
+				\begin{figure}[ht]
+					\centering
+					\includegraphics[width=\textwidth]{Immagini/DAG_completo}
+					\caption{\emph{Grafo, \emph{path weights}, matrice di incidenza e matrice dei \emph{path products}.} {\smaller (Immagine tratta dall'articolo originale)}}
+				\end{figure}
+			\end{column}
+			\begin{column}{0.25\textwidth}
+				\begin{align*}
+					& \begin{multlined}
+						(L^{\top})^2 = \\
+						= \left(\begin{smallmatrix}
+							\cdot & \cdot & a_1b_2 & a_1c_2+b_1c_3\\
+							& \cdot & \cdot  & b_2c_3 \\
+							& 	   & \cdot  & \cdot \\
+							& 	   & 	    & \cdot 
+						\end{smallmatrix}\right)
+					\end{multlined} \\
+					& (L^{\top})^3 = 
+						\left(\begin{smallmatrix}
+							\cdot & \cdot & \cdot & a_1b_2c_3\\
+								  & \cdot & \cdot & \cdot \\
+								  & 	  & \cdot & \cdot \\
+								  & 	  & 	  & \cdot 
+						\end{smallmatrix}\right)\\
+				\end{align*}
+			\end{column}
+		\end{columns}
+		
+	\end{frame}
+
+	\subsection{Calcolo dei \emph{path weights}}
+	\begin{frame}
+		{\hypertarget{frame:backsub_is_backprop}{Backpropagation come sostituzione all'indietro}}
+		
+		Quanto appena visto mostra che si può formulare il problema del calcolo dei \emph{path weights} in termini di algebra lineare.
+		\smallskip
+		
+		\onslide<2->{Per l'associatività del prodotto, esistono diversi modi di calcolare i \emph{path weights}: dalle sorgenti ai pozzi {\smaller (\emph{forward})}, dai pozzi alle sorgenti {\smaller (\emph{backward})}.}
+		
+		\begin{block}<3->{}
+			In generale, diversi modi di valutare l'espressione $\texttt{path\_weights}=\left(\begin{smallmatrix}I_s \\ 0\end{smallmatrix}\right)^{\!\!\top}(I-L)^{-\!\top}\left(\begin{smallmatrix}0 \\ I_p\end{smallmatrix}\right)$ corrispondono a diverse ``strategie'' per calcolare i \emph{path products}. (cfr. Appendice~\hyperlink{frame:different_orders:appendice}{\faHandPointRight}) 			
+			\smallskip 
+			
+			\textbf{Idea}: a ciascun modo di ``inserire parentesi'' corrisponde un ordine di visita di $\mathcal{G}$. 
+		\end{block}
+		
+		\onslide<4->{In particolare, calcolare \texttt{path\_weights} risolvendo $(I-L^{\top})x=\left(\begin{smallmatrix}0 \\ I_p\end{smallmatrix}\right)$ tramite sostituzione all'indietro corrisponde a un calcolo che procede dai pozzi alle sorgenti (cfr. Appendice~\hyperlink{frame:backsub_is_backprop:appendice}{\faHandPointRight}).}
+		\smallskip 
+		
+		\onslide<5->{Questa strategia corrisponde alla backpropagation per calcolare path products su grafi computazionali.}
+	\end{frame}
+	
+\section{Grafi computazionali}
+	\subsection{Definizione, relazioni tra DAG e AD}
+	\begin{frame}{Grafi computazionali}
+		Un \emph{grafo computazionale} rappresenta la ``struttura'' di una funzione. Mostrando quali \emph{step} sono richiesti per la valutazione, un grafo computazionale può descrivere un algoritmo di calcolo.
+		
+		\begin{definizione}
+			Un \alert{grafo computazionale} è un DAG etichettato, in cui:
+			\begin{itemize}
+				\item i \textbf{nodi sorgente} sono etichettati con nomi di variabili
+				\item i \textbf{nodi interni}, oltre a nomi di variabili, contengono formule che dipendono dai nodi entranti
+				\item ciascun \textbf{arco}  $i\to j$ è etichettato con $\pdv*{j}{i}$ {\smaller (ovvero la derivata della formula del nodo $j$ rispetto alla variabile $i$)}
+			\end{itemize}
+		\end{definizione}
+		
+		\textcolor{red}{Consideriamo grafi computazionali che derivano da algoritmi ``semplici''.}
+	\end{frame}
+	
+	\begin{frame}{Grafi computazionali e differenziazione automatica}
+		\textcolor{red}{C'è un'immediata corrispondenza tra i concetti visti nella prima parte -- quando legati a computational graphs -- e concetti di differenziazione automatica}
+		
+		\begin{table}[ht]
+			\centering
+			\caption{\emph{Didascalia}}
+			\begin{tabular}{lc}
+			\toprule 
+				Grafo computazionale & differenziazione automatica \\
+			\midrule
+				$w(i,j)$ & Derivata parziale $\pdv{j}{i}$ {\smaller (più precisamente, $\dd i\mapsto \pdv{j}{i}\dd i$)} \\
+				Path product del cammino $i\to j$ & Derivata parziale di $j$ rispetto a $i$ \\
+				Nodo sorgente & Parametri della funzione \\
+				Nodo pozzo & Tipicamente, una \emph{loss function}\\
+				\emph{Path weights} & Derivata della \emph{loss} rispetto ai parametri \\
+			\bottomrule
+			\end{tabular}
+		\end{table}
+		
+		\textcolor{red}{Due parole sulla regola della catena}
+	\end{frame}
+	
+	
+	\subsection{Il grafo computazionale di un MLP}
+	\begin{frame}[fragile]{Grafo computazionale di un MLP}
+		\begin{algorithm}[H]
+			\caption{MLP scalare, senza bias (inferenza)}
+			\begin{algorithmic}[0]
+				\Require \textcolor{orange}{Input pattern $x_0$},
+				\textcolor{orange}{pesi iniziali $w_i$, $i\in[N]$},
+				\textcolor{orange}{funzioni di attivazione $h_i$}
+				\For{$i=1,\dots, N$}
+				\State $x_i\gets h_i(w_ix_{i-1})$
+				\State \textcolor{SkyBlue}{$\qty(\delta_i\gets h_i'(w_ix_{i-1}))$}
+				\EndFor
+				\Ensure \textcolor{orange}{rappresentazione dell'output layer $x_N$}
+			\end{algorithmic}
+		\end{algorithm}
+	\end{frame}
+	
+	
+	
+	
+	
+	
+	
+	
+	
     
     \begin{frame}
         \begin{center}
@@ -192,9 +425,9 @@
     
     \begin{frame}{\refname}
     	\begin{thebibliography}{9}
-    		\bibitem{article:one} Author
-    		\newblock Title
-    		\newblock Where it can be found
+    		\bibitem{article:BackBackBack} A. Edelman, E. Akyurek, Y. Wang
+    		\newblock Backpropagation through Back Substitution with a Backslash
+    		\newblock SIAM J. Matrix Anal. Appl. Vol~45 (2024), No.~1, pp.~429-449
     	\end{thebibliography}
     \end{frame}
     
@@ -206,11 +439,143 @@
 		\end{center}
 	\end{frame}
 	
-%	\begin{frame}
-%		{\hypertarget{frame:prova_0:appendice}{Appendice per la slide 0}}
-%		
-%		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:prova_0}{\faHandPointLeft}}
-%	\end{frame}
+	\begin{frame}
+		{\hypertarget{frame:path_product_no_top_sort:appendice}{Matrice dei \emph{path products}, senza ordinamento topologico}}
+		Sia $L^{\top}\in\R{n}{n}$ la matrice di adiacenza di un DAG $\mathcal{G}$. L'operazione corrispondente alla rietichettatura dei nodi di $\mathcal{G}$ è il coniugio con una matrice di permutazione, dunque $\exists\,P\in\R{n}{n}$ di permutazione tale che $\hat{L}^{\top}\coloneqq P L^{\top} P^{\top}$ è strettamente triangolare superiore. 
+		
+		\begin{block}{}
+			Nella nuova etichettatura, i primi $s$ nodi sono sorgenti e gli ultimi $p$ sono pozzi. Nella vecchia etichettatura, i nodi sorgente sono indicizzati da $P^{\top}e_i$ per $i\in[s]$ {\smaller ($e_i$ è l'$i$-esimo versore canonico)}
+		\end{block}
+		
+		
+		Si ha $(I-\hat{L}^{\top})=P(I-L^{\top})P^{\top}$, da cui $(I-\hat{L})^{-\!\top}=P(I-L)^{-\!\top}P^{\top}$.
+		Dunque
+		\[\text{path weights} =
+		\begin{pNiceMatrix}%{cc}
+			\Block{2-3}<\large>{I_s} & & \\
+			& & \\
+			\Hline
+			\Block{2-3}<\large>{0} & & \\
+			& & \\
+		\end{pNiceMatrix}^{\mathllap{\top}}
+		\qty(I - \hat{L})^{-\!\top}
+		\begin{pNiceMatrix}%{cc}
+			\Block{3-2}<\large>{0} & \\
+			& \\
+			& \\
+			\Hline
+			\Block{1-2}{I_p} 	   & \\
+		\end{pNiceMatrix} =
+				\begin{pNiceMatrix}%{cc}
+			\Block{2-3}<\large>{I_s} & & \\
+			& & \\
+			\Hline
+			\Block{2-3}<\large>{0} & & \\
+			& & \\
+		\end{pNiceMatrix}^{\mathllap{\top}}
+		P\qty(I - L)^{-\!\top}P^{\top}
+		\begin{pNiceMatrix}%{cc}
+			\Block{3-2}<\large>{0} & \\
+			& \\
+			& \\
+			\Hline
+			\Block{1-2}{I_p} 	   & \\
+		\end{pNiceMatrix}
+		\]
+		
+		Ci siamo ricondotti al caso precedente. I path weights sono dati dagli elementi di $(I-L)^{-\!\top}$ di indici dati dai nodi sorgente/pozzo secondo l'enumerazione originale.
+		
+		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:path_product_no_top_sort}{\faHandPointLeft}}
+	\end{frame}
+	
+	\begin{frame}
+		{\hypertarget{frame:backsub_is_backprop:appendice}{Backsubstitution $\equiv$ backpropagation $\qquad 1/2$}}
+		{Formule della sostituzione all'indietro}
+		
+		Ricordiamo che la risoluzione $Tx=b$ tramite sostituzione all'indietro è data da
+		\[
+		\begin{dcases}
+			x_n = b_n / T_{n,n} & \\
+			x_k = \frac{1}{T_{k,k}}\smashoperator[r]{\sum_{j=k+1}^n} T_{k,j}x_k & k=n-1,\dots,1
+		\end{dcases}
+		\]
+		
+		Supponiamo $\mathcal{G}$ topologicamente ordinato. Allora la matrice di adiacenza $L^{\top}\in\R{n}{n}$ è strettamente triangolare superiore. Consideriamo per semplicità un singolo pozzo, rappresentato da $e_n$. La risoluzione di $(I-L)^{\top}x=e_n$ per sostituzione all'indietro diventa
+		\begin{equation}\label{eqn:backsub_ImLt}
+		\begin{dcases}
+			x_n = 1/1 = 1& \\
+			x_k = \smashoperator[lr]{\sum_{j=k+1}^n} (I-L^{\top})_{k,j}\,x_k = \smashoperator[lr]{\sum_{j=k+1}^n} (L^{\top})_{k,j}\,x_j
+		\end{dcases}	
+		\end{equation}
+	
+		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:backsub_is_backprop}{\faHandPointLeft}}
+	\end{frame}
+				
+	\begin{frame}
+		{Backsubstitution $\equiv$ backpropagation $\qquad 2/2$}
+		{Dimostrazione}
+		
+		\vspace{-1em}
+		\begin{proposizione}
+			$x_k$ restituito dalla~\eqref{eqn:backsub_ImLt} accumula {\smaller ($\equiv$ somma)} tutti i path product da $k$ a $n$.
+		\end{proposizione}	
+		\begin{block}{Dimostrazione.}
+			Per induzione su $k=n,\dots,1$.
+			\begin{itemize}
+				\item \textbf{Passo base}: $x_n=1$ è banalmente vero
+				\item \textbf{Passo induttivo}: consideriamo $\hat{\jmath}>k$. Poiché $(L^{\top})_{k,\hat{\jmath}}$ è il peso dell'arco $k\to\hat{\jmath}$ e $x_{\hat{\jmath}}$ è --per ipotesi induttiva -- il path product del cammino $\hat{\jmath}\to n$, 
+				$(L^{\top})_{k,\hat{\jmath}}\,x_{\hat{\jmath}}$ è il path product del cammino da $k$ a $n$ che passa da $\hat{\jmath}$ come primo passo.
+				\smallskip 
+				
+				Dunque ciascun addendo di~\eqref{eqn:backsub_ImLt} è il path product di un cammino da $k$ a $n$.
+				\smallskip 
+				
+				Ne segue che $x_k = \sum_{j=1}^n (L^{\top})_{k,j}\,x_j = \sum_{j=k+1}^n (L^{\top})_{k,j}\,x_j$, poiché $L^{\top}$ è triangolare superiore. \qedhere
+			\end{itemize}
+		\end{block}
+		
+		Di conseguenza, risolvere $(I-L)^{\top}x=e_n$ tramite sostituzione all'indietro corrisponde a calcolare i path weights visitando $\mathcal{G}$ dal pozzo alle sorgenti.
+		
+		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:backsub_is_backprop}{\faHandPointLeft}}
+	\end{frame}
+	
+	
+	\begin{frame}
+		{\hypertarget{frame:different_orders:appendice}{Strategie alternative per valutare \texttt{path\_weights}}}
+		{Ciascuna strategia di valutazione corrisponde a un diverso ordine di visita}
+		
+		$I-L^{\top}$ è triangolare superiore, e ha $1$ sulla diagonale. \`E possibile scrivere $(I-L)^{\top}$ come prodotto di matrici elementari di Gauss. Ciò corrisponde a fare eliminazione gaussiana (per colonne) per ridurre $I-L^{\top}$ all'identità, e poi invertire: $I-L^{\top}=E_1\cdot\ldots\cdot E_m$ dove ciascuna $E_i$ è una matrice elementare di Gauss.
+		Dunque 
+		\[
+		\texttt{path\_weights}=
+		\left\lgroup\begin{matrix}
+			I_s \\ 
+			\hline
+			0
+		\end{matrix}\right\rgroup^{\mathclap{\top}}
+		(I-L)^{-\!\top}
+		\left\lgroup\begin{matrix}
+			0 \\ 
+			\hline
+			I_p
+		\end{matrix}\right\rgroup = 
+		\left\lgroup\begin{matrix}
+			I_s \\ 
+			\hline
+			0
+		\end{matrix}\right\rgroup^{\mathclap{\top}}
+		E_m^{-1}\cdot\ldots\cdot E_1^{-1}
+		\left\lgroup\begin{matrix}
+			0 \\ 
+			\hline
+			I_p
+		\end{matrix}\right\rgroup.		
+		\]
+		
+		La scelta di un ``inserimento di parentesi'' restituisce un ordine nel calcolo dei path products. Moltiplicare due matrici elementari corrisponde a lavorare su sottografi {\smaller (es. calcolare path weights in \emph{reverse mode} su un sottografo)}; ossia a calcolare path products ``parziali'' che poi vengono utilizzati per calcolare path products di cammini che hanno quello già considerato come sottocammino.
+		
+		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:backsub_is_backprop}{\faHandPointLeft}}
+	\end{frame}
 
 \end{document}
 
