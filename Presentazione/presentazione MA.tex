@@ -306,11 +306,11 @@
 					\caption{\emph{Grafo, \emph{path weights}, matrice di incidenza e matrice dei \emph{path products}.} {\smaller (Immagine tratta dall'articolo originale)}}
 				\end{figure}
 			\end{column}
-			\begin{column}{0.25\textwidth}
+			\begin{column}{0.3\textwidth}
 				\begin{align*}
 					& \begin{multlined}
 						(L^{\top})^2 = \\
-						= \left(\begin{smallmatrix}
+						= \!\left(\begin{smallmatrix}
 							\cdot & \cdot & a_1b_2 & a_1c_2+b_1c_3\\
 							& \cdot & \cdot  & b_2c_3 \\
 							& 	   & \cdot  & \cdot \\
@@ -352,6 +352,7 @@
 		\onslide<5->{Questa strategia corrisponde alla backpropagation per calcolare path products su grafi computazionali.}
 	\end{frame}
 	
+
 \section{Grafi computazionali}
 	\subsection{Definizione, relazioni tra DAG e AD}
 	\begin{frame}{Grafi computazionali}
@@ -377,10 +378,10 @@
 			\caption{\emph{Didascalia}}
 			\begin{tabular}{lc}
 			\toprule 
-				Grafo computazionale & differenziazione automatica \\
+				Grafo computazionale & Differenziazione automatica \\
 			\midrule
 				$w(i,j)$ & Derivata parziale $\pdv{j}{i}$ {\smaller (più precisamente, $\dd i\mapsto \pdv{j}{i}\dd i$)} \\
-				Path product del cammino $i\to j$ & Derivata parziale di $j$ rispetto a $i$ \\
+				Path product del cammino $i\to j$ & Derivata di $j$ rispetto a $i$ \\
 				Nodo sorgente & Parametri della funzione \\
 				Nodo pozzo & Tipicamente, una \emph{loss function}\\
 				\emph{Path weights} & Derivata della \emph{loss} rispetto ai parametri \\
@@ -391,9 +392,8 @@
 		\textcolor{red}{Due parole sulla regola della catena}
 	\end{frame}
 	
-	
 	\subsection{Il grafo computazionale di un MLP}
-	\begin{frame}[fragile]{Grafo computazionale di un MLP}
+	\begin{frame}{Grafo computazionale di un MLP}
 
 		\begin{columns}
 			\begin{column}{0.4\textwidth}
@@ -425,8 +425,14 @@
 			\includegraphics[width=0.7\textwidth]{Immagini/MLP_compgraph_edited}
 			\caption{\emph{Grafo computazionale di un MLP con tre layer nascosti e un layer di output. Il calcolo della \emph{loss function} non è mostrato.}}
 		\end{figure}
-		
-		\textbf{Idea}: $x_i$ layer interni del MLP, $w_i$ parametri del layer $i$ {\smaller (aka pesi)}
+		\vspace*{-1em}
+		\begin{flalign*}
+			\textbf{Idea}:\left\lbrace
+			\begin{array}{rll}
+				x_i: & \text{unità {\smaller (aka neuroni)} del layer}\ i & \equiv\text{nodo interno {\smaller (indici: $1,\dots,4$)}}\\
+				w_i: & \text{parametri {\smaller (aka pesi)} del layer}\ i & \equiv\text{nodo sorgente {\smaller (indici: $5,\dots,8$)}}
+			\end{array}\right. &&
+		\end{flalign*}
 	\end{frame}
 	
 	\begin{frame}{Grafo computazionale di un MLP}
@@ -437,15 +443,160 @@
 				I & -M^{\top}\\
 				0 & I-\tilde{L}^{\top}
 			\end{matrix}\right),\quad
-			\text{dove}
+			\text{dove}\quad
 			\begin{dcases*}
-				M & connessioni tra sorgenti e \\
-				L
+				M & connessioni tra sorgenti e nodi interni\\
+				L & connessioni tra nodi interni
 			\end{dcases*}
 		\]
-		dove $M$ 
+		Dunque 
+		\[
+			(I-L^{\top})^{-1}=
+				\left(\begin{matrix}
+					I & M^{\top}\!(I-\tilde{L})^{-\!\top}\\
+					0 & (I-\tilde{L})^{-\!\top}
+				\end{matrix}\right).
+		\]
+		Di conseguenza, se l'ultimo nodo è l'unico pozzo, si ha
+		\[
+			\texttt{path\_weight}=M^{\top}(I-\tilde{L}^{\top})^{-1}e_n.
+		\]
+		
 	\end{frame}
-	
+
+
+\section{Matrici di operatori lineari}	
+	\begin{frame}
+		{Funzioni lineari tra spazi di matrici}
+		\begin{table}[ht]
+			\raggedright
+			\begin{tabular}{>{\smaller}p{0.12\textwidth}ccc}
+			\toprule
+				{\larger Nome} & Simbolo & Definizione & Rappresentazione densa \\
+			\midrule
+				Prodotto di Kronecker di $A$ con $B$ & $A\otimes B$ & {$\begin{array}{rcl}
+					\R{m}{n} & \longrightarrow & \R{m_1}{n_1}\\
+						X 	& \longmapsto & BX^{\top}A
+				\end{array}$}  & $A\otimes B$ {\smaller $(m_1n_1\times mn)$}\\
+			\bottomrule
+			\end{tabular}
+		\end{table}
+		
+	\end{frame}
+
+	\begin{frame}
+		{Funzioni lineari tra spazi di matrici}
+		\hrule 
+		\begin{columns}
+			\begin{column}{0.25\textwidth}
+				\centering {\textbf{Nome}}
+			\end{column}
+			\begin{column}{0.10\textwidth}
+				\centering \textbf{Simbolo}
+			\end{column}
+			\begin{column}{0.30\textwidth}
+				\centering \textbf{Definizione}
+			\end{column}
+			\begin{column}{0.35\textwidth}
+				\centering \framebox[1.1\height]{\textbf{Rappresentazione densa}}
+				%\vspace{5pt}
+				%\centering \textbf{Rappresentazione densa}
+				%\vspace{2pt}
+			\end{column}
+		\end{columns}
+		\hrule
+	% 1a riga		
+		\begin{columns}
+			\begin{column}{0.22\textwidth}
+				{\smaller Prodotto di Kronecker di $A$ con $B$}
+			\end{column}
+			\begin{column}{0.08\textwidth}
+				\center $A\otimes B$
+			\end{column}
+			\begin{column}{0.30\textwidth}
+				\[\begin{array}{rcl}
+					\R{m}{n} & \longrightarrow & \R{m_1}{n_1}\\
+						X 	& \longmapsto & BXA^{\top}
+				\end{array}\]
+			\end{column}
+			\begin{column}{0.30\textwidth}
+				\center $A\otimes B$ {\smaller $(m_1n_1\times mn)$}
+			\end{column}
+		\end{columns}
+	% 2a riga
+		\begin{columns}
+			\begin{column}{0.22\textwidth}
+				{\smaller Moltiplicazione a sinistra per $B$}
+			\end{column}
+			\begin{column}{0.08\textwidth}
+				\center $B_{\mathrm{L}}$
+			\end{column}
+			\begin{column}{0.30\textwidth}
+				\[\begin{array}{rcl}
+					\R{m}{n} & \longrightarrow & \R{m_1}{n}\\
+						X 	& \longmapsto & BX
+				\end{array}\]
+			\end{column}
+			\begin{column}{0.30\textwidth}
+				\center $I\otimes B$ {\smaller $(m_1n\times mn)$}
+			\end{column}
+		\end{columns}
+	% 3a riga
+		\begin{columns}
+			\begin{column}{0.22\textwidth}
+				{\smaller Moltiplicazione a destra per $A$}
+			\end{column}
+			\begin{column}{0.08\textwidth}
+				\center $A_{\mathrm{R}}$
+			\end{column}
+			\begin{column}{0.30\textwidth}
+				\[\begin{array}{rcl}
+					\R{m}{n_1} & \longrightarrow & \R{m}{n}\\
+						X 	& \longmapsto & XA
+				\end{array}\]
+			\end{column}
+			\begin{column}{0.30\textwidth}
+				\center $A^{\top}\otimes I$ {\smaller $(mn_1\times mn)$}
+			\end{column}
+		\end{columns}
+	% 4a riga
+		\begin{columns}
+			\begin{column}{0.22\textwidth}
+				{\smaller Prodotto di Hadamard con $M$}
+			\end{column}
+			\begin{column}{0.08\textwidth}
+				\center $M_{\mathrm{H}}$
+			\end{column}
+			\begin{column}{0.30\textwidth}
+				\[\begin{array}{rcl}
+					\R{m}{n} & \longrightarrow & \R{m}{n}\\
+						X 	& \longmapsto & M.*X
+				\end{array}\]
+			\end{column}
+			\begin{column}{0.30\textwidth}
+				\center $\operatorname{Diag}(\operatorname{Vec}(M))$ {\smaller $(mn\times mn)$}
+			\end{column}
+		\end{columns}
+	% 5a riga
+		\begin{columns}
+			\begin{column}{0.22\textwidth}
+				{\smaller Prodotto interno matriciale con $G$}
+			\end{column}
+			\begin{column}{0.08\textwidth}
+				\center $G^{\top\cdot}$
+			\end{column}
+			\begin{column}{0.30\textwidth}
+				\[\begin{array}{rcl}
+					\R{m}{n} & \longrightarrow & \R\\
+						X 	& \longmapsto & \langle G,X\rangle_F
+				\end{array}\]
+			\end{column}
+			\begin{column}{0.30\textwidth}
+				\center $\operatorname{Vec}(G)^{\top}$ {\smaller $(1\times mn)$}
+			\end{column}
+		\end{columns}
+		\hrule
+	\end{frame}
 	
 	
 	
