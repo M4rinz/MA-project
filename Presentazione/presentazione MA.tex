@@ -28,6 +28,7 @@
 
 %\usepackage[rightcaption]{sidecap}		% Per mettere le didascalie di lato
 
+%\usepackage{tikz}
 \usepackage{fontawesome5}				% Aggiunge simboli da FontAwesome
 
 \usepackage[many]{tcolorbox}
@@ -393,19 +394,56 @@
 	
 	\subsection{Il grafo computazionale di un MLP}
 	\begin{frame}[fragile]{Grafo computazionale di un MLP}
-		\begin{algorithm}[H]
-			\caption{MLP scalare, senza bias (inferenza)}
-			\begin{algorithmic}[0]
-				\Require \textcolor{orange}{Input pattern $x_0$},
-				\textcolor{orange}{pesi iniziali $w_i$, $i\in[N]$},
-				\textcolor{orange}{funzioni di attivazione $h_i$}
-				\For{$i=1,\dots, N$}
-				\State $x_i\gets h_i(w_ix_{i-1})$
-				\State \textcolor{SkyBlue}{$\qty(\delta_i\gets h_i'(w_ix_{i-1}))$}
-				\EndFor
-				\Ensure \textcolor{orange}{rappresentazione dell'output layer $x_N$}
-			\end{algorithmic}
-		\end{algorithm}
+
+		\begin{columns}
+			\begin{column}{0.4\textwidth}
+				\begin{figure}[h]
+					\centering
+					\includegraphics[width=\textwidth]{Immagini/scalar_MLP_pseudocode}
+				\end{figure}
+			\end{column}
+			\begin{column}{0.6\textwidth}
+				\[
+					(I-L^{\top}) = 
+					\left(\scriptsize\begin{array}{*{3}{c}|*{4}{c}}
+						 0 		& \cdots & 0 	  & \delta_1 x_0 & \cdot & \cdot & \cdot \\
+						 \cdot  &        & \cdot  & \cdot & \delta_2 x_1 & \cdot & \cdot \\
+						 \cdot	&   	 & \cdot  & \cdot & \cdot & \delta_3 x_2 & \cdot \\
+						 0 		& \cdots & 0 	  & \cdot & \cdot & \cdot & \delta_4 x_3 \\
+						\hline
+						 0     & \cdots & 0   	& \cdot & \delta_2 w_2 & \cdot & \cdot \\
+						 \cdot & 		& \cdot & \cdot & \cdot & \delta_3 w_3 & \cdot \\
+						 \cdot & 		& \cdot & \cdot & \cdot & \cdot & \delta_4 w_4 \\
+						 0	   & \cdots & 0 	& \cdot & \cdot & \cdot & \cdot 
+					\end{array}\right)
+				\]
+			\end{column}
+		\end{columns}
+
+		\begin{figure}[hp]
+			\centering
+			\includegraphics[width=0.7\textwidth]{Immagini/MLP_compgraph_edited}
+			\caption{\emph{Grafo computazionale di un MLP con tre layer nascosti e un layer di output. Il calcolo della \emph{loss function} non è mostrato.}}
+		\end{figure}
+		
+		\textbf{Idea}: $x_i$ layer interni del MLP, $w_i$ parametri del layer $i$ {\smaller (aka pesi)}
+	\end{frame}
+	
+	\begin{frame}{Grafo computazionale di un MLP}
+		Per il MLP scalare, si ha 
+		\[
+			(I-L^{\top})=
+			\left(\begin{matrix}
+				I & -M^{\top}\\
+				0 & I-\tilde{L}^{\top}
+			\end{matrix}\right),\quad
+			\text{dove}
+			\begin{dcases*}
+				M & connessioni tra sorgenti e \\
+				L
+			\end{dcases*}
+		\]
+		dove $M$ 
 	\end{frame}
 	
 	
