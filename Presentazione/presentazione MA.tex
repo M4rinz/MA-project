@@ -156,34 +156,34 @@
 %	\end{frame}	
 %	\setcounter{tocdepth}{2}
 
-\section{Introduzione}
+%\section{Introduzione}
 	\begin{frame}{Introduzione}
-		\textcolor{red}{\textbf{Da aggiustare}}
-		
 		\textbf{Obiettivo}: implementare la backpropagation, in Julia, usando il backslash.
-		\medskip 
+		\medskip
 		
-		\onslide<2->{Introducendo un tipo di dato per rappresentare funzioni lineari, dopo un minimo di setup per definire delle elementari operazioni su questo tipo di dato {\smaller (ma senza overloading del backslash!)}, il calcolo di $\grad{J}$ sarà dato da 
+		\onslide<2->{Descriveremo la \emph{backpropagation} usando il linguaggio dell'algebra lineare.}
+		\onslide<3->{Vedremo come ci sia una corrispondenza tra:}
+		\begin{itemize}
+			\item<4-> Calcolo delle derivate di una funzione
+			\item<5-> Calcolo di specifiche quantità sul suo \emph{grafo computazionale}
+			\item<6-> Operazioni tra particolari matrici.
+		\end{itemize} 
+		\medskip
+		
+		\onslide<7->{Introducendo un tipo di dato per rappresentare funzioni lineari, dopo un minimo di setup per definire delle elementari operazioni su questo tipo di dato {\smaller (ma senza overloading del backslash!)}, il calcolo di $\grad{J}$ sarà dato da 
 		\[
 			\grad{J} = M^{\top}\qty((I - \tilde{L}) \,\backslash\, g)
 		\]
 		dove $M$ e $\tilde{L}$ sono matrici che hanno operatori come elementi.}
-		%\smallskip 
 		
-		\onslide<3->{In particolare:}
-		\begin{enumerate}
-			\item<3-> Introdurremo i \emph{path weights} su un DAG, descrivendo il loro calcolo con il linguaggio dell'algebra lineare
-			\item<4-> Tracceremo un collegamento tra entità e operazioni su \emph{computational graph} e concetti di automatic differentiation {\smaller (in particolare, \emph{path weights} $\equiv$ derivate totali)}
-			\item<5-> Sarà possibile definire matrici di operatori {\smaller (aka il tipo di dato)}
-			\item<6-> Risoluzione di un sistema lineare $\equiv$ calcolo di tutte le derivate totali
-		\end{enumerate}
-		
+%		\onslide<3->{In particolare:}
+%		\begin{enumerate}
+%			\item<3-> Introdurremo i \emph{path weights} su un DAG, descrivendo il loro calcolo con il linguaggio dell'algebra lineare
+%			\item<4-> Tracceremo un collegamento tra entità e operazioni su \emph{computational graph} e concetti di automatic differentiation {\smaller (in particolare, \emph{path weights} $\equiv$ derivate totali)}
+%			\item<5-> Sarà possibile definire matrici di operatori {\smaller (aka il tipo di dato)}
+%			\item<6-> Risoluzione di un sistema lineare $\equiv$ calcolo di tutte le derivate totali
+%		\end{enumerate}		
 	\end{frame}
-
-%    \begin{frame}
-%    	{\hypertarget{frame:prova_0}{Slide 0}}
-%    	Slide di test 0 (cfr. Appendice~\hyperlink{frame:prova_0:appendice}{\faHandPointRight})
-%    \end{frame}
     
     
 \section{Cammini, \emph{path weights} su DAG}
@@ -209,7 +209,7 @@
 	\end{frame}
 	
 	\begin{frame}{Definizioni $\qquad 2/2$}{Matrice di adiacenza}
-		Abuso di notazione: un nodo viene identificato con la sua etichetta $i\in[n]$%\coloneqq\qty{1,\dots,n}$.
+		\textbf{Abuso di notazione}: un nodo viene identificato con la sua etichetta $i\in[n]$%\coloneqq\qty{1,\dots,n}$.
 		
 		\begin{definizione}
 			La \alert{matrice di adiacenza} $L$ di $\mathcal{G}$ è data da:
@@ -225,8 +225,7 @@
 		
 		\onslide<2->{Ricordiamo che $(L^{\top})^k$ accumula {\smaller ($\equiv$ somma)} i path products di lunghezza $k$:}
 		\onslide<3->{$(L^{\top})^k_{i,j}$ contiene la somma dei pesi di tutti i cammini da $i$ a $j$ di lunghezza $k$.}
-		
-
+	
 		
 		\blankfootnote{$[n]\coloneqq\qty{1,\dots, n}$}
 	\end{frame}
@@ -266,7 +265,7 @@
 		\end{equation*}}
 		\vspace*{-1em}
 		\begin{oss}<5->
-			Il metodo è valido anche senza ordinamento topologico, basta selezionare le righe/colonne corrispondenti alle sorgenti/pozzi (cfr. Appendice~\hyperlink{frame:path_product_no_top_sort:appendice}{\faHandPointRight})
+			Il metodo è valido anche senza ordinamento topologico, basta selezionare le righe/colonne corrispondenti alle sorgenti/pozzi. (cfr. Appendice~\hyperlink{frame:path_product_no_top_sort:appendice}{\faHandPointRight})
 		\end{oss}
 	\end{frame}
 	
@@ -358,42 +357,54 @@
 	\begin{frame}{Grafi computazionali}
 		Un \emph{grafo computazionale} rappresenta la ``struttura'' di una funzione. Mostrando quali \emph{step} sono richiesti per la valutazione, un grafo computazionale può descrivere un algoritmo di calcolo.
 		
-		\begin{definizione}
+		\onslide<2->{\begin{definizione}
 			Un \alert{grafo computazionale} è un DAG etichettato, in cui:
 			\begin{itemize}
 				\item i \textbf{nodi sorgente} sono etichettati con nomi di variabili
 				\item i \textbf{nodi interni}, oltre a nomi di variabili, contengono formule che dipendono dai nodi entranti
 				\item ciascun \textbf{arco}  $i\to j$ è etichettato con $\pdv*{j}{i}$ {\smaller (ovvero la derivata della formula del nodo $j$ rispetto alla variabile $i$)}
 			\end{itemize}
-		\end{definizione}
+		\end{definizione}}
 		
-		\textcolor{red}{Consideriamo grafi computazionali che derivano da algoritmi ``semplici''.}
+		\onslide<3->{\begin{oss}
+			Consideriamo grafi computazionali che derivano da algoritmi ``semplici''. {\smaller (no funzioni $\notin C^1$, niente $\mathtt{rand}()$, no \texttt{if\textvisiblespace else\textvisiblespace} risolvibili solo a runtime, \dots)}
+		\end{oss}}
+		
 	\end{frame}
 	
-	\begin{frame}{Grafi computazionali e differenziazione automatica}
-		\textcolor{red}{C'è un'immediata corrispondenza tra i concetti visti nella prima parte -- quando legati a computational graphs -- e concetti di differenziazione automatica}
-		
+	\begin{frame}{Grafi computazionali e differenziazione automatica}{}	
+		\vspace*{-1.5em}
+		{\renewcommand{\arraystretch}{1.05}
 		\begin{table}[ht]
 			\centering
-			\caption{\emph{Didascalia}}
-			\begin{tabular}{lc}
+			\caption{\emph{Corrispondenza tra entità dei grafi computazionali e concetti di AD}}
+			\begin{tabular}{>{\centering\arraybackslash}m{0.3\textwidth}>{\centering\arraybackslash}m{0.6\textwidth}}
 			\toprule 
-				Grafo computazionale & Differenziazione automatica \\
+				\textbf{Grafo computazionale} & \textbf{Differenziazione automatica} \\
 			\midrule
 				$w(i,j)$ & Derivata parziale $\pdv{j}{i}$ {\smaller (più precisamente, $\dd i\mapsto \pdv{j}{i}\dd i$)} \\
-				Path product del cammino $i\to j$ & Derivata di $j$ rispetto a $i$ \\
+				Path product \newline del cammino $i\to j$ & Derivata di $j$ rispetto a $i$ \\
 				Nodo sorgente & Parametri della funzione \\
 				Nodo pozzo & Tipicamente, una \emph{loss function}\\
 				\emph{Path weights} & Derivata della \emph{loss} rispetto ai parametri \\
 			\bottomrule
 			\end{tabular}
-		\end{table}
+		\end{table}}
 		
-		\textcolor{red}{Due parole sulla regola della catena}
+		%\textcolor{red}{Due parole sulla regola della catena}
+		\onslide<2->{\textbf{Regola della catena}: ``il differenziale della composizione è la composizione dei differenziali''.} 
+		
+		\onslide<2->{In coordinate: ``il Jacobiano della composizione è dato dal prodotto dei Jacobiani''.}
+	%	\smallskip 
+			
+		\onslide<3->{\begin{block}{}
+			Nel contesto dei grafi computazionali, calcolo dei \emph{path weights} $\equiv$ calcolo della derivata secondo la regola della catena. \onslide<4->{Precisamente, 
+			per calcolare la derivata rispetto a un input bisogna accumulare tutti i \emph{path weights} dalla sorgente al pozzo corrispondenti.}
+		\end{block}}
 	\end{frame}
 	
 	\subsection{Il grafo computazionale di un MLP}
-	\begin{frame}{Grafo computazionale di un MLP}
+	\begin{frame}{Grafo computazionale di un MLP$\qquad 1/2$}{Algoritmo e rappresentazione grafica}
 
 		\begin{columns}
 			\begin{column}{0.4\textwidth}
@@ -404,7 +415,7 @@
 			\end{column}
 			\begin{column}{0.6\textwidth}
 				\[
-					(I-L^{\top}) = 
+					L^{\top} = 
 					\left(\scriptsize\begin{array}{*{3}{c}|*{4}{c}}
 						 0 		& \cdots & 0 	  & \delta_1 x_0 & \cdot & \cdot & \cdot \\
 						 \cdot  &        & \cdot  & \cdot & \delta_2 x_1 & \cdot & \cdot \\
@@ -435,7 +446,9 @@
 		\end{flalign*}
 	\end{frame}
 	
-	\begin{frame}{Grafo computazionale di un MLP}
+	\begin{frame}
+		{\hypertarget{frame:adding_loss}{Grafo computazionale di un MLP$\qquad 2/2$}}
+		{Calcolo dei path weights}
 		Per il MLP scalare, si ha 
 		\[
 			(I-L^{\top})=
@@ -446,46 +459,38 @@
 			\text{dove}\quad
 			\begin{dcases*}
 				M & connessioni tra sorgenti e nodi interni\\
-				L & connessioni tra nodi interni
+				\tilde{L} & connessioni tra nodi interni
 			\end{dcases*}
 		\]
-		Dunque 
+		\onslide<2->{Dunque 
 		\[
 			(I-L^{\top})^{-1}=
 				\left(\begin{matrix}
 					I & M^{\top}\!(I-\tilde{L})^{-\!\top}\\
 					0 & (I-\tilde{L})^{-\!\top}
 				\end{matrix}\right).
-		\]
-		Di conseguenza, se l'ultimo nodo è l'unico pozzo, si ha
+		\]}
+		\onslide<3->{Di conseguenza, se l'ultimo nodo è l'unico pozzo, si ha
 		\[
-			\texttt{path\_weight}=M^{\top}(I-\tilde{L}^{\top})^{-1}e_n.
-		\]
+			\texttt{path\_weights}=M^{\top}(I-\tilde{L}^{\top})^{-1}e_n.
+		\]}
+		\vspace*{-1em}
 		
+		\onslide<4->{\begin{block}{}
+		Considerare la loss $L$ corrisponde ad aggiungere un nodo $L$ e un arco $x_N\to L$, con peso $\delta_L\coloneqq L'(x_N)$. {\smaller ($L$ è il nuovo pozzo)}
+		
+		\onslide<5->{\emph{Turns out} che, in \texttt{path\_weights}, compare $(0,\dots,0,\delta_L)^{\top}$ al posto di $e_n$ (cfr. Appendice~\hyperlink{frame:adding_loss:appendice}{\faHandPointRight}).} \onslide<6->{Le dimensioni restano immutate. Questo è rappresentativo del caso generale.}
+		\end{block}}
 	\end{frame}
 
 
 \section{Matrici di operatori lineari}	
+	\subsection{Alcune funzioni lineari tra spazi di matrici}
 	\begin{frame}
 		{Funzioni lineari tra spazi di matrici}
-		\begin{table}[ht]
-			\raggedright
-			\begin{tabular}{>{\smaller}p{0.12\textwidth}ccc}
-			\toprule
-				{\larger Nome} & Simbolo & Definizione & Rappresentazione densa \\
-			\midrule
-				Prodotto di Kronecker di $A$ con $B$ & $A\otimes B$ & {$\begin{array}{rcl}
-					\R{m}{n} & \longrightarrow & \R{m_1}{n_1}\\
-						X 	& \longmapsto & BX^{\top}A
-				\end{array}$}  & $A\otimes B$ {\smaller $(m_1n_1\times mn)$}\\
-			\bottomrule
-			\end{tabular}
-		\end{table}
 		
-	\end{frame}
-
-	\begin{frame}
-		{Funzioni lineari tra spazi di matrici}
+		Siano $A\in\R{n_1}{n}, B\in\R{m_1}{m}, M\in\R{m}{n}, G\in\R{m}{n}$
+		\medskip
 		\hrule 
 		\begin{columns}
 			\begin{column}{0.25\textwidth}
@@ -498,10 +503,7 @@
 				\centering \textbf{Definizione}
 			\end{column}
 			\begin{column}{0.35\textwidth}
-				\centering \framebox[1.1\height]{\textbf{Rappresentazione densa}}
-				%\vspace{5pt}
-				%\centering \textbf{Rappresentazione densa}
-				%\vspace{2pt}
+				\parbox[c][3ex][c]{\linewidth}{\centering\textbf{Rappresentazione densa}}
 			\end{column}
 		\end{columns}
 		\hrule
@@ -570,7 +572,7 @@
 			\begin{column}{0.30\textwidth}
 				\[\begin{array}{rcl}
 					\R{m}{n} & \longrightarrow & \R{m}{n}\\
-						X 	& \longmapsto & M.*X
+						X 	& \longmapsto & M\,.\!*X
 				\end{array}\]
 			\end{column}
 			\begin{column}{0.30\textwidth}
@@ -583,7 +585,7 @@
 				{\smaller Prodotto interno matriciale con $G$}
 			\end{column}
 			\begin{column}{0.08\textwidth}
-				\center $G^{\top\cdot}$
+				\center $G^{\top\bullet}$
 			\end{column}
 			\begin{column}{0.30\textwidth}
 				\[\begin{array}{rcl}
@@ -596,7 +598,131 @@
 			\end{column}
 		\end{columns}
 		\hrule
+		\medskip 
+		
+		Dove $\langle G,X\rangle_F\coloneqq\tr(G^{\top}X)=\sum_{i,j}G_{i,j}X_{i,j}$
 	\end{frame}
+	
+	\begin{frame}{L'operatore $\fbox{\rule{0pt}{0.45em}\rule{0.3em}{0pt}}^{\top\bullet}$}
+		\begin{notazione}
+			Per un'operatore lineare $\mathcal{L}$, $\mathcal{L}\,X$ può denotare
+			\begin{itemize}
+				\item l'\textbf{applicazione} di $\mathcal{L}$ a $X$, $\mathcal{L}(X)$ {\smaller (se $X$ è un punto)}
+				\item la \textbf{composizione} di $\mathcal{L}$ con $X$, $\mathcal{L}\circ X$ {\smaller (se $X$ è un omomorfismo)}
+			\end{itemize} 
+		\end{notazione}
+		\onslide<2->{\begin{notazione}
+			A seconda del contesto, $\colorbox{gray!30}{\phantom{$\cdot$}}^{\top}\!$ denota la matrice trasposta, o l'operatore aggiunto.
+		\end{notazione}}
+		
+		\onslide<3->{\begin{lemma}
+			Sia $\mathcal{L}\colon\R{p}{q}\to\R{m}{n}$ lineare, e $G\in\R{m}{n}$. Si ha
+			$\qty(\mathcal{L}^{\top}\,G)^{\top\bullet}=G^{\top\bullet}\,\mathcal{L}$
+		\end{lemma}}
+		\onslide<4->{\begin{proof}
+			Per ogni $X\in\R{p}{q}$,
+			$
+				\qty(\mathcal{L}^{\top}\,G)^{\top\bullet}\,X = \langle\mathcal{L}^{\top}\,G,X\rangle_F=
+				\langle G,\mathcal{L}\,X\rangle_F = \qty(G^{\top\bullet}\,\mathcal{L})\,X
+			$
+		\end{proof}}
+	\end{frame}
+	
+	\subsection{Il MLP nel caso generale}
+	\begin{frame}{MLP, caso generale $\qquad 1/3$}{Algoritmo e rappresentazione grafica}
+		\begin{columns}
+			\begin{column}{0.5\textwidth}
+				\begin{figure}[h]
+					\centering
+					\includegraphics[width=\textwidth]{Immagini/matrix_MLP_pseudocode}
+				\end{figure}
+			\end{column}
+			\begin{column}{0.5\textwidth}
+%				\[
+%				(I-L^{\top}) = 
+%				\left(\scriptsize\begin{array}{*{3}{c}|*{4}{c}}
+%					0 		& \cdots & 0 	  & \delta_1 x_0 & \cdot & \cdot & \cdot \\
+%					\cdot  &        & \cdot  & \cdot & \delta_2 x_1 & \cdot & \cdot \\
+%					\cdot	&   	 & \cdot  & \cdot & \cdot & \delta_3 x_2 & \cdot \\
+%					0 		& \cdots & 0 	  & \cdot & \cdot & \cdot & \delta_4 x_3 \\
+%					\hline
+%					0     & \cdots & 0   	& \cdot & \delta_2 w_2 & \cdot & \cdot \\
+%					\cdot & 		& \cdot & \cdot & \cdot & \delta_3 w_3 & \cdot \\
+%					\cdot & 		& \cdot & \cdot & \cdot & \cdot & \delta_4 w_4 \\
+%					0	   & \cdots & 0 	& \cdot & \cdot & \cdot & \cdot 
+%				\end{array}\right)
+%				\]
+				%Per $A\in\R{m}{n}$, $h\colon\R\to\R$, $\R{m}{n}\ni h.(A)\coloneqq\qty(h(a_{i,j}))_{i,j}$
+				Archi:
+				\begin{align*}
+					X_{i-1} & \xlongrightarrow{\pdv*{X_i}{X_{i-1}}}X_i\\
+					W_i	    & \xlongrightarrow{\pdv*{X_i}{W_i}}X_i\\
+					b_{i}   & \xlongrightarrow{\pdv*{X_i}{b_i}}X_i
+				\end{align*}
+			\end{column}
+		\end{columns}
+		\begin{figure}[hp]
+			\centering
+			\includegraphics[width=0.7\textwidth]{Immagini/general_MLP_compgraph_edited}
+			\caption{\emph{Grafo computazionale di un MLP con tre layer nascosti, un layer di output e il calcolo della loss function.}}
+		\end{figure}
+		\vspace*{-1em}		
+		Per $A\in\R{m}{n}$, $h\colon\R\to\R$, $\R{m}{n}\ni h.(A)\coloneqq\qty(h(a_{i,j}))_{i,j}$ {\smaller (applicazione \emph{pointwise} di $h$)}
+		%$h.$ denota l'applicazione pointwise di $h$
+	\end{frame}
+	
+	\begin{frame}{MLP, caso generale $\qquad 2/2$}{Aggiunta di \emph{loss} e bias}
+		\textcolor{red}{veloci remarks su aggiunta di loss e bias}
+		
+		\textcolor{red}{Un recap veloce dell'ML, e inquadrare quello che è il nostro problema (scrivere la derivata totale della loss. Vogliamo farlo a modo nostro, usando la \texttt{machinery} che abbiamo predisposto (ossia calcolare path weights). Dunque ci serve la matrice di adiacenda del grafo computazionale del MLP)}
+	\end{frame}
+	
+	\begin{frame}{MLP, caso generale $\qquad 2/3$}{Differenziale della funzione di attivazione}
+		Ci proponiamo di scrivere la matrice di adiacenza del grafo computazionale del MLP nel caso generale.
+		
+		\begin{definizione}
+			Per $h\colon\R\to\R$, l'applicazione \emph{pointwise} di $h$ è
+			\vspace*{-0.5em}
+			\[
+				\begin{array}{rccl}
+					h.\colon & \R{m}{n} & \longrightarrow & \R{m}{n} \\
+							 & A	 	& \longmapsto	  & \qty(h(a_{i,j}))_{\substack{i\in[m]\\ j\in[n]}}
+				\end{array}
+			\]
+		\end{definizione}
+		Ricordiamo che $\dd h.(A)=\qty(h.(A))'[\dd{A}]$ {\smaller (differenziale di Fréchet)}.
+		\begin{align*}
+			h.(A + \dd A) - h.(A) & = \qty(h(a_{i,j}+\dd{a}_{i,j}) - h(a_{i,j}))_{i,j} 
+			= \qty(h'(a_{i,j})\dd{a_{i,j}})_{i,j}\\
+			 & = h'.(A)\,.\!* \dd{A} \equiv \qty(h'.(A))_{\mathrm{H}}[\dd{A}]
+		\end{align*}
+		Dunque $\dd h.(A)$ è la funzione $\dd{A}\mapsto\qty(h'.(A))_{\mathrm{H}}[\dd{A}]$.
+		\medskip 
+		
+		Il particolare per il MLP, $\dd{h.}(W_iX_i+b_ie^{\top})=(\Delta_i)_{\mathrm{H}}\,\dd\qty(W_iX_i+b_ie^{\top})$
+	\end{frame}
+	
+	\begin{frame}
+		{\hypertarget{frame:layer_differential}{MLP, caso generale $\qquad 3/3$}}
+		{Differenziale del layer $i$-esimo}
+		Dunque il differenziale del layer $i$-esimo è dato da
+		\begin{align*}
+			\dd{X_i} & = \dd\qty(h_i.\qty(W_iX_{i-1} + b_ie^{\top})) =
+			\qty(\Delta_i)_{\mathrm{H}}\qty[\dd\qty(W_iX_{i-1}+B_i)]
+		\onslide<2->{\intertext{$W_i$ e $B_i$ sono parametri, ma la dipendenza da parametri si nasconde anche dentro $X_{i-1}$, dunque (cfr. Appendice~\hyperlink{frame:layer_differential:appendice}{\faHandPointRight})}}
+			\onslide<3->{
+			\dd{X_i} & = {\Delta_i}_{\mathrm{H}}\qty[\dd{W_i}X_{i-1}+W_i\dd{X_{i-1}}+\dd{B_i}]\\
+			}
+			\onslide<4->{
+				& = \underbrace{\qty({\Delta_i}_{\mathrm{H}}\circ{X_{i-1}}_{\mathrm{R}})}_{\pdv{X_i}{W_i}}\,\dd{W_i}
+				  +	\underbrace{\qty({\Delta_i}_{\mathrm{H}}\circ{W_{i}}_{\mathrm{L}})}_{\pdv{X_i}{X_{i-1}}}\,\dd{X_{i-1}}
+				  + \underbrace{\qty({\Delta_i}_{\mathrm{H}}\circ{e^{\top}}_{\mathrm{R}})}_{\pdv{X_i}{b_i}}\,\dd{b_i}
+			}
+		\end{align*}
+		
+		
+	\end{frame}
+	
 	
 	
 	
@@ -639,7 +765,7 @@
 		
 		Si ha $(I-\hat{L}^{\top})=P(I-L^{\top})P^{\top}$, da cui $(I-\hat{L})^{-\!\top}=P(I-L)^{-\!\top}P^{\top}$.
 		Dunque
-		\[\text{path weights} =
+		\[\texttt{path\_weights} =
 		\begin{pNiceMatrix}%{cc}
 			\Block{2-3}<\large>{I_s} & & \\
 			& & \\
@@ -764,6 +890,173 @@
 		La scelta di un ``inserimento di parentesi'' restituisce un ordine nel calcolo dei path products. Moltiplicare due matrici elementari corrisponde a lavorare su sottografi {\smaller (es. calcolare path weights in \emph{reverse mode} su un sottografo)}; ossia a calcolare path products ``parziali'' che poi vengono utilizzati per calcolare path products di cammini che hanno quello già considerato come sottocammino.
 		
 		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:backsub_is_backprop}{\faHandPointLeft}}
+	\end{frame}
+	
+	\begin{frame}
+		{\hypertarget{frame:adding_loss:appendice}{Aggiunta di un nodo al grafo computazionale $\qquad 1/2$}}
+	
+		Supponiamo che $\mathcal{G}$ abbia $s$ sorgenti {\smaller (etichettati $1,\dots,s$)} e solo un nodo pozzo {\smaller (etichettato $n$)}. Si ha
+		$
+			\texttt{path\_weights}=
+			\left(\begin{array}{c|c}
+				I_s & 0\\ 
+			\end{array}\right)
+			(I-L)^{-\!\top}e_n.
+		$
+		\smallskip
+		
+		Vogliamo aggiungere un ulteriore nodo, e un arco $n\to n+1$ con peso $w$. L'operazione corrispondente è
+		\[
+			\texttt{new\_path\_weights}=
+			\begin{pNiceMatrix}%{cc}
+				\Block{2-3}<\large>{I_s} & & \\
+				& & \\
+				\Hline
+				\Block{2-3}<\large>{0} & & \\
+				& & \\
+				\Hline[tikz=dashed]
+				0 & \Cdots & 0
+			\end{pNiceMatrix}^{\mathllap{\top}}
+			\underbrace{\begin{pNiceArray}{ccccc|[tikz=dashed]c}
+				\Block{4-5}{(I-L)^{-\!\top}} & & & & & \\
+				 & & & & & \\
+				 & & & & & \\
+				 & & & & & \\
+				\Hline[tikz=dashed]
+				 & & & & & 1
+			\end{pNiceArray}
+			\begin{pNiceArray}{cccc|[tikz=dashed]c}[nullify-dots]
+				\mathsmaller{1} & 	     & &   				 & \mathsmaller{0}\\
+				  				& \Ddots & &   				 & \Vdots \\
+				  				&		 & &   				 & \mathsmaller{0}\\
+				  				& 	     & & \mathsmaller{1} & w\\
+				\Hline[tikz=dashed]
+				  & & & & 1
+			\end{pNiceArray}}_{\text{nuova matrice dei \emph{path products}}}
+			\begin{pNiceMatrix}[nullify-dots]
+				\mathsmaller{0} \\
+				\Vdots \\
+				\\
+				\mathsmaller{0} \\
+				\Hline[tikz=dashed]
+				1
+			\end{pNiceMatrix}
+		\]
+		
+		\textbf{Idea}: i \emph{path weights} del nodo $n+1$ sono ottenuti da quelli del nodo $n$, moltiplicandoli per $w$. {\smaller (La moltiplicazione è a destra, perché $w$ è l'ultimo arco percorso!)}
+		\smallskip
+		
+		Quindi la nuova matrice dei \emph{path products} ha una colonna in più, in cui tutti gli elementi sono uguali a quelli della colonna precedente, moltiplicati per $w$. 
+		\smallskip
+		
+		In termini di algebra lineare, ciò corrisponde all'operazione rappresentata.
+		
+		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:adding_loss}{\faHandPointLeft}}
+	\end{frame}
+	
+	\begin{frame}{Aggiunta di un nodo al grafo computazionale $\qquad 2/2$}
+		\[
+			\texttt{new\_path\_weights}=
+			\begin{pNiceMatrix}%{cc}
+				\Block{2-3}<\large>{I_s} & & \\
+				& & \\
+				\Hline
+				\Block{2-3}<\large>{0} & & \\
+				& & \\
+				\Hline[tikz=dashed]
+				0 & \Cdots & 0
+			\end{pNiceMatrix}^{\mathllap{\top}}
+			\underbrace{\begin{pNiceArray}{ccccc|[tikz=dashed]c}
+					\Block{4-5}{(I-L)^{-\!\top}} & & & & & \\
+					& & & & & \\
+					& & & & & \\
+					& & & & & \\
+					\Hline[tikz=dashed]
+					& & & & & 1
+				\end{pNiceArray}
+				\begin{pNiceArray}{cccc|[tikz=dashed]c}[nullify-dots]
+					\mathsmaller{1} & 	     & &   				 & \mathsmaller{0}\\
+					& \Ddots & &   				 & \Vdots \\
+					&		 & &   				 & \mathsmaller{0}\\
+					& 	     & & \mathsmaller{1} & w\\
+					\Hline[tikz=dashed]
+					& & & & 1
+			\end{pNiceArray}}_{\text{nuova matrice dei \emph{path products}}}
+			\begin{pNiceMatrix}[nullify-dots]
+				\mathsmaller{0} \\
+				\Vdots \\
+				\\
+				\mathsmaller{0} \\
+				\Hline[tikz=dashed]
+				1
+			\end{pNiceMatrix}.
+		\]
+		\noindent Svolgendo le operazioni, si ottiene
+		\vspace*{-1em}
+		\[
+			\texttt{new\_path\_weights}=
+			\left(\begin{array}{c|c}
+				I_s & 0\\
+			\end{array}\right)
+			\qty(I - L)^{-\!\top}
+			\left(\begin{matrix}%[nullify-dots]
+				\mathsmaller{0} \\
+				\vdots \\
+				\mathsmaller{0} \\
+				\mathsmaller{w}
+			\end{matrix}\right).
+			%\left({\footnotesize {0},\dots,{0},{w}}\right)^{\top}
+		\]
+		Il sistema lineare ha la stessa dimensione del precedente, cambia solo il termine noto.
+		Non dipendendo dalla ``forma'' di $w$, il ragionamento è valido anche più in generale, con operatori come elementi. %{\smaller (a patto di fare le dovute sostituzioni, ad esempio sostituire i $0$ e $1$ con gli operatori nulli e identità, rispettivamente)}
+		
+		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:adding_loss}{\faHandPointLeft}}
+	\end{frame}
+	
+	\begin{frame}
+		{\hypertarget{frame:layer_differential:appendice}{Dettagli sul calcolo del differenziale del layer $i$-esimo $\qquad 1/2$}}
+		
+		Per la regola della catena, $\dd{X_i}=\pdv{X_i}{(W_iX_{i-1}+B_i)}\dd{(W_iX_{i-1}+B_i)}$, da cui 
+		$\dd{X_i}=\qty(\Delta_i)_{\mathrm{H}}\qty[\dd\qty(W_iX_{i-1}+B_i)]$. 
+		\medskip 
+		
+		Per esplicitare il differenziale di $W_iX_{i-1}+b_ie^{\top}$ rispetto ai parametri, dobbiamo considerare tre casi: 
+		\begin{enumerate}
+			\item $X_{i-1}\mapsto W_iX_{i-1}+B_i\equiv X_i\mapsto {W_i}_{\mathrm{L}}\qty[X_{i-1}]+B_i$
+			\item $W_i\mapsto W_iX_{i-1}+B_i\equiv W_i\mapsto {X_{i-1}}_{\mathrm{R}}\qty[W_i]+B_i$
+			\item $b_i\mapsto W_iX_{i-1}+b_ie^{\top}\equiv b_i\mapsto W_iX_{i-1}+{e^{\top}}_{\mathrm{R}}[b_i]$
+		\end{enumerate}
+		\smallskip 
+		
+		In tutti e tre i casi abbiamo una funzione affine. Quindi {\smaller (in qualsiasi punto)} il differenziale è dato dalla parte lineare: 
+		\begin{enumerate}
+			\item $\pdv{X_{i-1}}\qty(W_iX_{i-1}+B_i)={W_i}_{\mathrm{L}}$, ossia la funzione $\dd{X}\mapsto{W_i}_{\mathrm{L}}[\dd{X}]$
+			\item $\pdv{W_i}\qty(W_iX_{i-1}+B_i)={X_{i-1}}_{\mathrm{R}}$, ossia la funzione $\dd{W}\mapsto{X_{i-1}}_{\mathrm{R}}[\dd{W}]$
+			\item $\pdv{b_i}\qty(W_iX_{i-1}+B_i)={e^{\top}}_{\mathrm{R}}$, ossia la funzione $\dd{b}\mapsto{e^{\top}}_{\mathrm{R}}[\dd{b}]$
+		\end{enumerate}
+		
+		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:layer_differential}{\faHandPointLeft}}	
+	\end{frame}
+	
+	\begin{frame}{Dettagli sul calcolo del differenziale del layer $i$-esimo $\qquad 2/2$}
+		
+		Mettendo tutto assieme,
+		\begin{align*}
+			\dd{X_i} & = \qty(\Delta_i)_{\mathrm{H}}\qty[\dd\qty(W_iX_{i-1}+B_i)]=
+			{\Delta_i}_{\mathrm{H}}\qty[{X_{i-1}}_{\mathrm{R}}\,W_i + {W_i}_{\mathrm{L}}\,X_{i-1}+{e^{\top}}_{\mathrm{R}}\,b_i]\\
+			 & = \underbrace{\qty({\Delta_i}_{\mathrm{H}}\circ{X_{i-1}}_{\mathrm{R}})}_{\pdv{X_i}{W_i}}\,\dd{W_i}
+			   + \underbrace{\qty({\Delta_i}_{\mathrm{H}}\circ{W_{i}}_{\mathrm{L}})}_{\pdv{X_i}{X_{i-1}}}\,\dd{X_{i-1}}
+			   + \underbrace{\qty({\Delta_i}_{\mathrm{H}}\circ{e^{\top}}_{\mathrm{R}})}_{\pdv{X_i}{b_i}}\,\dd{b_i}.
+		\end{align*}
+		
+		Questo mostra che 
+		\[
+			\dd{X_i}=\pdv{X_i}{W_i}\dd{W_i} + \pdv{X_i}{X_{i-1}}\dd{X_{i-1}} + \pdv{X_i}{b_i}\dd{b_i},
+		\]
+		infatti per la regola della catena $\pdv{X_i}{\star}=\pdv{X_i}{(X_{i-1}W_i+B_i)}\pdv{(X_{i-1}W_i+B_i)}{\star}$; abbiamo visto che $\pdv{X_i}{(X_{i-1}W_i+B_i)}={\Delta_i}_{\mathrm{H}}$ e ad esempio  {\smaller ($\star = W_i$)} $\pdv{(X_{i-1}W_i+B_i)}{W_i}={X_{i-1}}_{\mathrm{R}}$
+		
+	
+		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:layer_differential}{\faHandPointLeft}}
 	\end{frame}
 
 \end{document}
