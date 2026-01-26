@@ -357,18 +357,18 @@
 	\begin{frame}{Grafi computazionali}
 		Un \emph{grafo computazionale} rappresenta la ``struttura'' di una funzione. Mostrando quali \emph{step} sono richiesti per la valutazione, un grafo computazionale può descrivere un algoritmo di calcolo.
 		
-		\onslide<2->{\begin{definizione}
+		\begin{definizione}<2->
 			Un \alert{grafo computazionale} è un DAG etichettato, in cui:
 			\begin{itemize}
 				\item i \textbf{nodi sorgente} sono etichettati con nomi di variabili
 				\item i \textbf{nodi interni}, oltre a nomi di variabili, contengono formule che dipendono dai nodi entranti
 				\item ciascun \textbf{arco}  $i\to j$ è etichettato con $\pdv*{j}{i}$ {\smaller (ovvero la derivata della formula del nodo $j$ rispetto alla variabile $i$)}
 			\end{itemize}
-		\end{definizione}}
+		\end{definizione}
 		
-		\onslide<3->{\begin{oss}
+		\begin{oss}<3->
 			Consideriamo grafi computazionali che derivano da algoritmi ``semplici''. {\smaller (no funzioni $\notin C^1$, niente $\mathtt{rand}()$, no \texttt{if\textvisiblespace else\textvisiblespace} risolvibili solo a runtime, \dots)}
-		\end{oss}}
+		\end{oss}
 		
 	\end{frame}
 	
@@ -391,16 +391,15 @@
 			\end{tabular}
 		\end{table}}
 		
-		%\textcolor{red}{Due parole sulla regola della catena}
 		\onslide<2->{\textbf{Regola della catena}: ``il differenziale della composizione è la composizione dei differenziali''.} 
 		
 		\onslide<2->{In coordinate: ``il Jacobiano della composizione è dato dal prodotto dei Jacobiani''.}
 	%	\smallskip 
 			
-		\onslide<3->{\begin{block}{}
+		\begin{block}<3->{}
 			Nel contesto dei grafi computazionali, calcolo dei \emph{path weights} $\equiv$ calcolo della derivata secondo la regola della catena. \onslide<4->{Precisamente, 
 			per calcolare la derivata rispetto a un input bisogna accumulare tutti i \emph{path weights} dalla sorgente al pozzo corrispondenti.}
-		\end{block}}
+		\end{block}
 	\end{frame}
 	
 	\subsection{Il grafo computazionale di un MLP}
@@ -476,21 +475,21 @@
 		\]}
 		\vspace*{-1em}
 		
-		\onslide<4->{\begin{block}{}
-		Considerare la loss $L$ corrisponde ad aggiungere un nodo $L$ e un arco $x_N\to L$, con peso $\delta_L\coloneqq L'(x_N)$. {\smaller ($L$ è il nuovo pozzo)}
-		
-		\onslide<5->{\emph{Turns out} che, in \texttt{path\_weights}, compare $(0,\dots,0,\delta_L)^{\top}$ al posto di $e_n$ (cfr. Appendice~\hyperlink{frame:adding_loss:appendice}{\faHandPointRight}).} \onslide<6->{Le dimensioni restano immutate. Questo è rappresentativo del caso generale.}
-		\end{block}}
+		\begin{block}<4->{}
+			Considerare la loss $L$ corrisponde ad aggiungere un nodo $L$ e un arco $x_N\to L$, con peso $\delta_L\coloneqq L'(x_N)$. {\smaller ($L$ è il nuovo pozzo)}
+			
+			\onslide<5->{\emph{Turns out} che, in \texttt{path\_weights}, compare $(0,\dots,0,\delta_L)^{\top}$ al posto di $e_n$ (cfr. Appendice~\hyperlink{frame:adding_loss:appendice}{\faHandPointRight}).} \onslide<6->{Le dimensioni restano immutate. Questo è rappresentativo del caso generale.}
+		\end{block}
 	\end{frame}
 
 
 \section{Matrici di operatori lineari}	
 	\subsection{Alcune funzioni lineari tra spazi di matrici}
 	\begin{frame}
-		{Funzioni lineari tra spazi di matrici}
+		{\hypertarget{frame:adjoints}{Funzioni lineari tra spazi di matrici}}
 		
 		Siano $A\in\R{n_1}{n}, B\in\R{m_1}{m}, M\in\R{m}{n}, G\in\R{m}{n}$
-		\medskip
+		\smallskip
 		\hrule 
 		\begin{columns}
 			\begin{column}{0.25\textwidth}
@@ -503,7 +502,7 @@
 				\centering \textbf{Definizione}
 			\end{column}
 			\begin{column}{0.35\textwidth}
-				\parbox[c][3ex][c]{\linewidth}{\centering\textbf{Rappresentazione densa}}
+				\parbox[c][2.8ex][c]{\linewidth}{\centering\textbf{Rappresentazione densa}}
 			\end{column}
 		\end{columns}
 		\hrule
@@ -598,9 +597,10 @@
 			\end{column}
 		\end{columns}
 		\hrule
-		\medskip 
+		\smallskip 
 		
-		Dove $\langle G,X\rangle_F\coloneqq\tr(G^{\top}X)=\sum_{i,j}G_{i,j}X_{i,j}$
+		Dove $\langle G,X\rangle_F\coloneqq\tr(G^{\top}X)=\sum_{i,j}G_{i,j}X_{i,j}.\qquad$
+		{\smaller (Per le aggiunte, cfr. Appendice~\hyperlink{frame:adjoints:appendice}{\faHandPointRight})}
 	\end{frame}
 	
 	\begin{frame}{L'operatore $\fbox{\rule{0pt}{0.45em}\rule{0.3em}{0pt}}^{\top\bullet}$}
@@ -611,25 +611,25 @@
 				\item la \textbf{composizione} di $\mathcal{L}$ con $X$, $\mathcal{L}\circ X$ {\smaller (se $X$ è un omomorfismo)}
 			\end{itemize} 
 		\end{notazione}
-		\onslide<2->{\begin{notazione}
+		\begin{notazione}<2->
 			A seconda del contesto, $\colorbox{gray!30}{\phantom{$\cdot$}}^{\top}\!$ denota la matrice trasposta, o l'operatore aggiunto.
-		\end{notazione}}
+		\end{notazione}
 		
-		\onslide<3->{\begin{lemma}
+		\begin{lemma}<3->
 			Sia $\mathcal{L}\colon\R{p}{q}\to\R{m}{n}$ lineare, e $G\in\R{m}{n}$. Si ha
 			$\qty(\mathcal{L}^{\top}\,G)^{\top\bullet}=G^{\top\bullet}\,\mathcal{L}$
-		\end{lemma}}
-		\onslide<4->{\begin{proof}
+		\end{lemma}
+		\begin{proof}<4->
 			Per ogni $X\in\R{p}{q}$,
 			$
 				\qty(\mathcal{L}^{\top}\,G)^{\top\bullet}\,X = \langle\mathcal{L}^{\top}\,G,X\rangle_F=
 				\langle G,\mathcal{L}\,X\rangle_F = \qty(G^{\top\bullet}\,\mathcal{L})\,X
 			$
-		\end{proof}}
+		\end{proof}
 	\end{frame}
 	
 	\subsection{Il MLP nel caso generale}
-	\begin{frame}{MLP, caso generale $\qquad 1/3$}{Algoritmo e rappresentazione grafica}
+	\begin{frame}{MLP, caso generale $\qquad 1/2$}{Algoritmo e rappresentazione grafica}
 		\begin{columns}
 			\begin{column}{0.5\textwidth}
 				\begin{figure}[h]
@@ -638,21 +638,6 @@
 				\end{figure}
 			\end{column}
 			\begin{column}{0.5\textwidth}
-%				\[
-%				(I-L^{\top}) = 
-%				\left(\scriptsize\begin{array}{*{3}{c}|*{4}{c}}
-%					0 		& \cdots & 0 	  & \delta_1 x_0 & \cdot & \cdot & \cdot \\
-%					\cdot  &        & \cdot  & \cdot & \delta_2 x_1 & \cdot & \cdot \\
-%					\cdot	&   	 & \cdot  & \cdot & \cdot & \delta_3 x_2 & \cdot \\
-%					0 		& \cdots & 0 	  & \cdot & \cdot & \cdot & \delta_4 x_3 \\
-%					\hline
-%					0     & \cdots & 0   	& \cdot & \delta_2 w_2 & \cdot & \cdot \\
-%					\cdot & 		& \cdot & \cdot & \cdot & \delta_3 w_3 & \cdot \\
-%					\cdot & 		& \cdot & \cdot & \cdot & \cdot & \delta_4 w_4 \\
-%					0	   & \cdots & 0 	& \cdot & \cdot & \cdot & \cdot 
-%				\end{array}\right)
-%				\]
-				%Per $A\in\R{m}{n}$, $h\colon\R\to\R$, $\R{m}{n}\ni h.(A)\coloneqq\qty(h(a_{i,j}))_{i,j}$
 				Archi:
 				\begin{align*}
 					X_{i-1} & \xlongrightarrow{\pdv*{X_i}{X_{i-1}}}X_i\\
@@ -667,8 +652,8 @@
 			\caption{\emph{Grafo computazionale di un MLP con tre layer nascosti, un layer di output e il calcolo della loss function.}}
 		\end{figure}
 		\vspace*{-1em}		
-		Per $A\in\R{m}{n}$, $h\colon\R\to\R$, $\R{m}{n}\ni h.(A)\coloneqq\qty(h(a_{i,j}))_{i,j}$ {\smaller (applicazione \emph{pointwise} di $h$)}
-		%$h.$ denota l'applicazione pointwise di $h$
+	%	Per $A\in\R{m}{n}$, $h\colon\R\to\R$, $\R{m}{n}\ni h.(A)\coloneqq\qty(h(a_{i,j}))_{i,j}$ {\smaller (applicazione \emph{pointwise} di $h$)}
+		Vogliamo scrivere la matrice di adiacenza del grafo computazionale
 	\end{frame}
 	
 	\begin{frame}{MLP, caso generale $\qquad 2/2$}{Aggiunta di \emph{loss} e bias}
@@ -681,7 +666,30 @@
 		\textcolor{red}{Devo pensare a come si ricollega al fatto di avere una matrice di operatori, e un vettore (termine noto del sistema) che ha come elementi lo zero e in fondo un gradiente numerico diciamo}
 	\end{frame}
 	
-	\begin{frame}{MLP, caso generale $\qquad 2/3$}{Differenziale della funzione di attivazione}
+	\begin{frame}{Intermezzo: cenni di \emph{Machine Learning}}
+		\begin{block}{Remark 1:} 
+			ML $\cong$ minimizzare la \emph{loss function} $\mathcal{L}(\Theta;X_0)$. {\smaller ($\Theta$ racchiude tutti i parametri del modello)}
+		
+			Esempio: $\mathcal{L}(\Theta;X_0)=\frac{1}{k}\sum_{l=1}^k\norm{X_N[:\mid\!l] - y^{(l)}}_2^2$.
+			\medskip
+		
+			Tipicamente, $\mathcal{L}(\Theta;X_0)\equiv L(X_N)$, con $L\colon\R{n_N}{k}\to\R$ e $X_N=X_N(\Theta;X_0)$. 
+			\medskip
+		
+			Si ha $\dd{\mathcal{L}}=\qty(\grad{\mathcal{L}})^{\!\!\top\bullet}\dd{\Theta}$. Allo stesso tempo, per la regola della catena: $\dd{\mathcal{L}}=\pdv{L}{X_N}\dd{X_N}=\qty(\grad{L})^{\!\top\bullet}\dd{X_N}$, e a sua volta 
+			$\dd{X_N}=\pdv{X_N}{\Theta}\dd{\Theta}$.
+		
+			Dunque $\dd{L}=\left\langle\qty(\pdv{X_N}{\Theta})^{\!\!\top}\grad{L},\dd{\Theta}\right\rangle_F$.
+			\smallskip
+			
+			La vera sfida: applicare $\qty(\pdv{X_N}{\Theta})^{\mathclap{\top}}$ a $\grad{L}$, per ottenere $\grad_{\Theta}\mathcal{L}$. Ciò corrisponde al calcolo dei \emph{path weights}.
+		\end{block}
+		\begin{block}{Remark 2:}
+			Il \emph{bias} viene aggiunto indipendentemente a ciascun \emph{pattern} che viene processato. Nel layer $i$ si ha: $W_iX_{i-1}\,.\!+b_i\equiv W_iX_{i-1}+B_i$, dove $B_i\coloneqq b_ie^{\top}$.
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}{Pesi degli archi $\qquad 1/2$}{Differenziale della funzione di attivazione}
 		Ci proponiamo di scrivere la matrice di adiacenza del grafo computazionale del MLP nel caso generale.
 		
 		\begin{definizione}
@@ -694,20 +702,20 @@
 				\end{array}
 			\]
 		\end{definizione}
-		Ricordiamo che $\dd h.(A)=\qty(h.(A))'[\dd{A}]$ {\smaller (differenziale di Fréchet)}.
-		\begin{align*}
+		\onslide<2->{Ricordiamo che $\dd h.(A)=\qty(h.(A))'[\dd{A}]$ {\smaller (differenziale di Fréchet)}.}
+		\onslide<3->{\begin{align*}
 			h.(A + \dd A) - h.(A) & = \qty(h(a_{i,j}+\dd{a}_{i,j}) - h(a_{i,j}))_{i,j} 
 			= \qty(h'(a_{i,j})\dd{a_{i,j}})_{i,j}\\
-			 & = h'.(A)\,.\!* \dd{A} \equiv \qty(h'.(A))_{\mathrm{H}}[\dd{A}]
-		\end{align*}
-		Dunque $\dd h.(A)$ è la funzione $\dd{A}\mapsto\qty(h'.(A))_{\mathrm{H}}[\dd{A}]$.
+			 & = h'.(A)\,.\!* \dd{A} \equiv \qty(h'.(A))_{\mathrm{H}}[\dd{A}].
+		\end{align*}}
+		\onslide<4->{Dunque $\dd h.(A)$ è la funzione $\dd{A}\mapsto\qty(h'.(A))_{\mathrm{H}}[\dd{A}]$.}
 		\medskip 
 		
-		Il particolare per il MLP, $\dd{h.}(W_iX_i+b_ie^{\top})=(\Delta_i)_{\mathrm{H}}\,\dd\qty(W_iX_i+b_ie^{\top})$
+		\onslide<5->{Il particolare per il MLP, $\dd{h.}(W_iX_{i-1}+b_ie^{\top})=(\Delta_i)_{\mathrm{H}}\,\dd\qty(W_iX_i+b_ie^{\top})$}
 	\end{frame}
 	
 	\begin{frame}
-		{\hypertarget{frame:layer_differential}{MLP, caso generale $\qquad 3/3$}}
+		{\hypertarget{frame:layer_differential}{Pesi degli archi $\qquad 2/2$}}
 		{Differenziale del layer $i$-esimo}
 		Dunque il differenziale del layer $i$-esimo è dato da
 		\begin{align*}
@@ -722,10 +730,78 @@
 				  +	\underbrace{\qty({\Delta_i}_{\mathrm{H}}\circ{W_{i}}_{\mathrm{L}})}_{\pdv{X_i}{X_{i-1}}}\,\dd{X_{i-1}}
 				  + \underbrace{\qty({\Delta_i}_{\mathrm{H}}\circ{e^{\top}}_{\mathrm{R}})}_{\pdv{X_i}{b_i}}\,\dd{b_i}
 			}
-		\end{align*}
-		
+		\end{align*}		
 		
 	\end{frame}
+	
+	\begin{frame}
+		{\hypertarget{frame:loss_derivative}{Derivata della \emph{loss}}}
+		{Derivata della loss rispetto ad alcuni suoi parametri}
+		%Possiamo scrivere la derivata della \emph{loss} rispetto ai parametri
+		Seguendo i \emph{path weights} direttamente sul grafo computazionale, procedendo dalla sorgente al pozzo, si ha
+		\begin{align*}
+			\pdv{\mathcal{L}}{W_i} & =
+				\underbrace{\grad{L}^{\top\bullet}}_{\pdv{\mathcal{L}}{X_N}}\ \underbrace{(\Delta_N)_{\mathrm{H}}\,(W_N)_{\mathrm{L}}}_{\pdv{X_N}{X_{N-1}}}\,\ldots\,    \underbrace{(\Delta_{i+1})_{\mathrm{H}}\,(W_{i+1})_{\mathrm{L}}}_{\pdv{X_{i+1}}{X_i}}\ 
+				\underbrace{(\Delta_i)_{\mathrm{H}}\,(X_{i-1})_{\mathrm{R}}}_{\pdv{X_{i}}{W_i}}\\
+			\pdv{\mathcal{L}}{b_i} & =
+				\underbrace{\grad{L}^{\top\bullet}}_{\pdv{\mathcal{L}}{X_N}}\ \underbrace{(\Delta_N)_{\mathrm{H}}\,(W_N)_{\mathrm{L}}}_{\pdv{X_N}{X_{N-1}}}\,\ldots\,    \underbrace{(\Delta_{i+1})_{\mathrm{H}}\,(W_{i+1})_{\mathrm{L}}}_{\pdv{X_{i+1}}{X_i}}\ 
+				\underbrace{(\Delta_i)_{\mathrm{H}}\,(e^{\!\top})_{\mathrm{R}}}_{\pdv{X_{i}}{b_i}}\\  
+		%\end{align*}
+		\intertext{Per le proprietà del $\colorbox{gray!30}{\phantom{$\cdot$}}^{\top\bullet}\!$ si ha (cfr. Appendice~\hyperlink{frame:loss_derivative:appendice}{\faHandPointRight})}
+		%\begin{align*}
+			\pdv{\mathcal{L}}{W_i} & = \Big(
+				\big(X_{i-1}^{\top}\big)_{\mathrm{R}}\qty(\Delta_i)_{\mathrm{H}}\ 
+				\big(W_{i+1}^{\top}\big)_{\mathrm{L}}\qty(\Delta_{i+1})_{\mathrm{H}}\,\ldots\,
+				\big(W_N^{\top}\big)_{\mathrm{L}}\qty(\Delta_N)_{\mathrm{H}}\ 
+				\grad{L}\Big)^{\!\top\bullet}\\
+			\pdv{\mathcal{L}}{b_i} & = \Big(
+				e_{\mathrm{R}}\qty(\Delta_i)_{\mathrm{H}}\ 
+				\big(W_{i+1}^{\top}\big)_{\mathrm{L}}\qty(\Delta_{i+1})_{\mathrm{H}}\,\ldots\,
+				\big(W_N^{\top}\big)_{\mathrm{L}}\qty(\Delta_N)_{\mathrm{H}}\ 
+				\grad{L}\Big)^{\!\top\bullet}\\
+		\end{align*}
+		\vspace*{-3em}
+		
+		che corrisponde ad accumulare i pesi visitando il grafo al contrario.
+	\end{frame}
+		
+	\begin{frame}{Derivata della \emph{loss}}{Ricavare il gradiente dalla matrice di adiacenza}
+		La matrice di adiacenza del MLP ha come elementi i pesi degli archi, dunque operatori lineari. \onslide<2->{Per quanto visto, il gradiente della \emph{loss} è dato da}
+		\onslide<2->{\begin{multline*}
+			\grad{\mathcal{L}} = 
+			\begin{pNiceMatrix}[nullify-dots]
+				{\Delta_1}_{\mathrm{H}}\circ{X_0}_{\mathrm{R}} & {\Delta_1}_{\mathrm{H}}\circ{e^{\!\top}}_{\mathrm{R}} & & & & \\
+				& \Ddots & \Ddots & & & \\
+				&		 & 		  & & & \\
+				&		 & 		  & & & \\
+				& & & & {\Delta_3}_{\mathrm{H}}\circ{X_2}_{\mathrm{R}} & {\Delta_3}_{\mathrm{H}}\circ{e^{\!\top}}_{\mathrm{R}}
+			\end{pNiceMatrix}^{\mathclap{\top}}\cdot\\
+			\begin{pNiceMatrix}[nullify-dots]
+				\mathcal{I} & & & & & \\
+				-{\Delta_2}_{\mathrm{H}}\circ{W_2}_{\mathrm{L}} & \mathcal{I} & & & & \\
+				&             &             &             &             & \\
+				&             &             &             &             & \\
+				&             &             &             & \mathcal{I} & \\
+				&             &             &             & -{\Delta_N}_{\mathrm{H}}\circ{W_N}_{\mathrm{L}} & \mathcal{I} \\
+				\CodeAfter
+				\tikz[loosely dotted, line width=0.8pt]
+				\draw (2-2.east) -- (5-5.north west)
+				(2-1.south) -- (6-5.north west);
+			\end{pNiceMatrix}^{\mathclap{-\!\top}}\cdot 
+			\begin{pNiceMatrix}[nullify-dots]
+				\mathcal{O}\\
+				\Vdots
+				\\
+				\\
+				\\
+				\mathcal{O}\\
+				\grad_{X_n}{L}
+			\end{pNiceMatrix}	
+		\end{multline*}}
+	
+		\blankfootnote{\onslide<2->{$\mathcal{I}$: operatore identità, $\mathcal{O}$: operatore nullo}}
+	\end{frame}
+	
 	
 	
 	
@@ -1024,7 +1100,7 @@
 		$\dd{X_i}=\qty(\Delta_i)_{\mathrm{H}}\qty[\dd\qty(W_iX_{i-1}+B_i)]$. 
 		\medskip 
 		
-		Per esplicitare il differenziale di $W_iX_{i-1}+b_ie^{\top}$ rispetto ai parametri, dobbiamo considerare tre casi: 
+		Per esplicitare il differenziale di $W_iX_{i-1}+b_ie^{\top}$ rispetto ai parametri, si considerano tre casi: 
 		\begin{enumerate}
 			\item $X_{i-1}\mapsto W_iX_{i-1}+B_i\equiv X_i\mapsto {W_i}_{\mathrm{L}}\qty[X_{i-1}]+B_i$
 			\item $W_i\mapsto W_iX_{i-1}+B_i\equiv W_i\mapsto {X_{i-1}}_{\mathrm{R}}\qty[W_i]+B_i$
@@ -1032,7 +1108,7 @@
 		\end{enumerate}
 		\smallskip 
 		
-		In tutti e tre i casi abbiamo una funzione affine. Quindi {\smaller (in qualsiasi punto)} il differenziale è dato dalla parte lineare: 
+		In tutti e tre abbiamo una funzione affine. Quindi {\smaller (in qualsiasi punto)} il differenziale è dato dalla parte lineare: 
 		\begin{enumerate}
 			\item $\pdv{X_{i-1}}\qty(W_iX_{i-1}+B_i)={W_i}_{\mathrm{L}}$, ossia la funzione $\dd{X}\mapsto{W_i}_{\mathrm{L}}[\dd{X}]$
 			\item $\pdv{W_i}\qty(W_iX_{i-1}+B_i)={X_{i-1}}_{\mathrm{R}}$, ossia la funzione $\dd{W}\mapsto{X_{i-1}}_{\mathrm{R}}[\dd{W}]$
@@ -1057,10 +1133,117 @@
 		\[
 			\dd{X_i}=\pdv{X_i}{W_i}\dd{W_i} + \pdv{X_i}{X_{i-1}}\dd{X_{i-1}} + \pdv{X_i}{b_i}\dd{b_i},
 		\]
-		infatti per la regola della catena $\pdv{X_i}{\star}=\pdv{X_i}{(X_{i-1}W_i+B_i)}\pdv{(X_{i-1}W_i+B_i)}{\star}$; abbiamo visto che $\pdv{X_i}{(X_{i-1}W_i+B_i)}={\Delta_i}_{\mathrm{H}}$ e ad esempio  {\smaller ($\star = W_i$)} $\pdv{(X_{i-1}W_i+B_i)}{W_i}={X_{i-1}}_{\mathrm{R}}$
+		infatti per la regola della catena $\pdv{X_i}{\star}=\pdv{X_i}{(X_{i-1}W_i+B_i)}\textcolor{red}{\cdot}\pdv{(X_{i-1}W_i+B_i)}{\star}$; abbiamo visto che $\pdv{X_i}{(X_{i-1}W_i+B_i)}={\Delta_i}_{\mathrm{H}}$ e ad esempio  {\smaller ($\star = W_i$)} $\pdv{(X_{i-1}W_i+B_i)}{W_i}={X_{i-1}}_{\mathrm{R}}$
+		
+		\begin{oss}
+			Il $\textcolor{red}{\cdot}$ è il prodotto ``giusto'' a seconda del contesto: composizione {\smaller (se le derivate parziali sono pensate come operatori lineari)}, o prodotto matriciale {\smaller (se invece le derivate parziali sono viste ``in coordinate'', pensate come ``gli oggetti che agiscono'')}
+		\end{oss}
 		
 	
 		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:layer_differential}{\faHandPointLeft}}
+	\end{frame}
+	
+	\begin{frame}
+		{\hypertarget{frame:loss_derivative:appendice}{Aggiunti di operatori lineari $\qquad 1/4$}}
+		{}
+		Abbiamo visto 
+		\[
+			\pdv{L}{W_i}=\pdv{L}{X_N}\pdv{X_N}{W_i}=\grad{L}^{\!\top\bullet}\overbrace{\pdv{X_N}{W_i}}^{\coloneqq M_i}.
+		\]
+		Per il lemma,
+		\[
+			\grad{L}^{\!\top\bullet}M_i=\qty(M_i^{\top}\grad{L})^{\!\top\bullet}.
+		\]
+		Per la regola della catena, $M_i$ è dato dalla composizione di operatori lineari:
+		\[
+			M_i=\underbrace{M_i^{(1,N)}M_i^{(2,N)}}_{\pdv{X_N}{X_{N-1}}}\ldots
+				\underbrace{M_i^{(1,i+1)}M_i^{(2,i+1)}}_{\pdv{X_{i+1}}{X_i}}
+				\underbrace{M_i^{(1,i)}M_i^{(2,i)}}_{\pdv{X_i}{W_i}}.
+		\]
+		$M^{\top}$ si ottiene componendo gli aggiunti dei singoli fattori in ordine inverso:
+		\[
+			M^{\top}=\qty(M_i^{(1,N)}M_i^{(2,N)}\ldots M_i^{(1,i)}M_i^{(2,i)})^{\top}=
+					{M_i^{(2,i)}}^{\top}{M_i^{(1,i)}}^{\top}\!\!{\dots}\,{M_i^{(2,N)}}^{\top}{M_i^{(1,N)}}^{\top}
+		\]
+		
+		\blankfootnote{\textbf{Indietro:}~\hyperlink{frame:loss_derivative}{\faHandPointLeft}}		
+	\end{frame}
+	
+	\begin{frame}
+		{\hypertarget{frame:adjoints:appendice}{Aggiunti di operatori lineari $\qquad 2/4$}}
+		{L'aggiunta di $A_{\mathrm{R}}$}
+		
+		Convenendo che $\qty(\phantom{A})_{\mathrm{R}}$ agisca su matrici con $m$ righe, per $A\in\R{n_1}{n}$ la funzione		
+		$(A^{\top})_{\mathrm{R}}\colon\R{m}{n}\to\R{m}{n_1}$ ha ``tipo'' compatibile con l'aggiunta di $A_{\mathrm{R}}$.
+		
+		\begin{lemma}
+			Sia $A\in\R{n_1}{n}$. Si ha $(A_{\mathrm{R}})^{\!\top}=(A^{\top})_{\mathrm{R}}$
+		\end{lemma}
+		\begin{proof}
+			Per ogni $U\in\R{m}{n}$, $\forall\,V\in\R{m}{n_1}$ si ha
+			\begin{align*}
+				\langle(A^{\top})_{\mathrm{R}}U, V\rangle_{F} & =\tr(\qty(UA^{\top})^{\top}V)=\tr(AU^{\top}V)\\
+			\intertext{Per la proprietà ciclica della traccia,}
+				& = \tr(U^{\top}VA)=\langle U,VA\rangle_F=\langle U, A_{\mathrm{R}}\,V\rangle_{F}.
+			\end{align*}
+			Dunque $(A^{\top})_{\mathrm{R}}$ è l'aggiunta di $A_{\mathrm{R}}$.
+		\end{proof}
+		
+		\blankfootnote{
+			\textbf{Indietro:}  (definizioni~\hyperlink{frame:adjoints}{\faHandPointLeft})$\quad$ 
+			(derivata della \emph{loss}~\hyperlink{frame:loss_derivative}{\faHandPointLeft})
+		}
+	\end{frame}
+	
+	\begin{frame}{Aggiunti di operatori lineari $\qquad 3/4$}{L'aggiunta di $B_{\mathrm{L}}$}
+		Convenendo che $\qty(\phantom{B})_{\mathrm{R}}$ agisca su matrici con $n$ colonne, per $B\in\R{m_1}{m}$ la funzione $(B^{\top})\colon\R{m_1}{n}\to\R{m}{n}$ ha ``tipo'' compatibile con l'aggiunta di $B_{\mathrm{R}}$.
+		
+		\begin{lemma}
+			Sia $B\in\R{m_1}{m}$. Si ha $(B_{\mathrm{L}})^{\top}=(B^{\top})_{\mathrm{L}}$
+		\end{lemma}
+		\begin{proof}
+			Per ogni $U\in\R{m_1}{m}$, $\forall\,V\in\R{m}{n}$ si ha
+			\[
+				\left\langle(B^{\top})_{\mathrm{L}}U,V\right\rangle_F=\langle B^{\top}U,V\rangle_F=\tr((B^{\top}U)^{\top}V)=\tr(U^{\top}BV)=\left\langle U, (B)_{\mathrm{L}}V\right\rangle_F.
+			\]
+			Dunque $(B^{\top})_{\mathrm{L}}$ è l'aggiunta di $B_{\mathrm{L}}$.
+		\end{proof}
+		
+		\textbf{Idea}: passando alla vettorizzazione, $B_{\mathrm{L}}$ è rappresentato da $I\otimes B$, e $(I\otimes B)^{\top}=I\otimes B^{\top}$. $I\otimes B^{\top}$ rappresenta $(B^{\top})_{\mathrm{L}}$.
+		
+		\blankfootnote{
+			\textbf{Indietro:}  (definizioni~\hyperlink{frame:adjoints}{\faHandPointLeft})$\quad$ 
+			(derivata della \emph{loss}~\hyperlink{frame:loss_derivative}{\faHandPointLeft})
+		}
+	\end{frame}
+	
+	\begin{frame}{Aggiunti di operatori lineari $\qquad 4/4$}{L'aggiunta di $M_{\mathrm{H}}$}
+		Ricordiamo che:
+		\begin{itemize}
+			\item $\phi\colon\qty(V,\langle\cdot,\cdot\rangle_V)\to\qty(W,\langle\cdot,\cdot\rangle_W)$ è un'\textbf{isometria} se $\langle v_1,v_2\rangle_V=\langle\phi(v_1),\phi(v_2)\rangle_W$ per ogni $v_1,v_2\in V$
+			\item L'inverso di un isomorfismo isometrico coincide con il suo aggiunto: $\phi^{-1}=\phi^{\top}$
+		\end{itemize}
+		
+		Si vede a occhio che $\operatorname{Vec}\colon\qty(\R{m}{n},\langle\cdot,\cdot\rangle_F)\to\qty(\R{mn},\langle\cdot,\cdot\rangle_2)$ è un'isometria %{\smaller (è fatta apposta\dots)}
+		
+		\begin{lemma}
+			Sia $M\in\R{m}{n}$. La funzione $M_{\mathrm{H}}$ è autoaggiunta: $(M_{\mathrm{H}})^{\top}=M_{\mathrm{H}}$
+		\end{lemma}
+		\begin{proof}
+			Sia $\R{mn}{mn}\ni\tilde{M}\coloneqq\operatorname{Diag}(\operatorname{Vec}(M))$, e sia 
+			$f_{\tilde{M}}\colon\R{mn}\to\R{mn}$ t.c. $f_{\tilde{M}}(v)=\tilde{M}v$. Essendo $\tilde{M}$ diagonale, $f_{\tilde{M}}$ è chiaramente autoaggiunta. 
+			\smallskip
+			
+			Si ha $M_{\mathrm{H}}=\operatorname{Vec}^{-1}\circ f\circ\operatorname{Vec}$. Essendo $\operatorname{Vec}$ un'isometria, 
+			\[
+				(M_{\mathrm{H}})^{\top}=\operatorname{Vec}^{\top}\circ f^{\top}\circ\operatorname{Vec}^{-\top}=\operatorname{Vec}\circ f\circ\operatorname{Vec}^{-1}=M_{\mathrm{H}}.\qedhere
+			\]
+		\end{proof}
+			
+		\blankfootnote{
+			\textbf{Indietro:}  (definizioni~\hyperlink{frame:adjoints}{\faHandPointLeft})$\quad$ 
+								(derivata della \emph{loss}~\hyperlink{frame:loss_derivative}{\faHandPointLeft})
+		}
 	\end{frame}
 
 \end{document}
