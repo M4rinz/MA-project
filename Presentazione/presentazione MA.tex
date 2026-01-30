@@ -656,16 +656,6 @@
 		Vogliamo scrivere la matrice di adiacenza del grafo computazionale
 	\end{frame}
 	
-	\begin{frame}{MLP, caso generale $\qquad 2/2$}{Aggiunta di \emph{loss} e bias}
-		\textcolor{red}{veloci remarks su aggiunta di loss e bias}
-		
-		\textcolor{red}{Un recap veloce dell'ML, e inquadrare quello che è il nostro problema (scrivere la derivata totale della loss. Vogliamo farlo a modo nostro, usando la \texttt{machinery} che abbiamo predisposto (ossia calcolare path weights). Dunque ci serve la matrice di adiacenda del grafo computazionale del MLP)}
-		
-		\textcolor{red}{Boh forse dire che quando si fa il forward pass abbiamo $X_N$ (è una matrice), e quindi possiamo calcolare $\grad_{X_n}{L}$. Però vogliamo calcolare la derivata totale della loss.}
-		
-		\textcolor{red}{Devo pensare a come si ricollega al fatto di avere una matrice di operatori, e un vettore (termine noto del sistema) che ha come elementi lo zero e in fondo un gradiente numerico diciamo}
-	\end{frame}
-	
 	\begin{frame}{Intermezzo: cenni di \emph{Machine Learning}}
 		\begin{block}{Remark 1:} 
 			ML $\cong$ minimizzare la \emph{loss function} $\mathcal{L}(\Theta;X_0)$. {\smaller ($\Theta$ racchiude tutti i parametri del modello)}
@@ -679,7 +669,7 @@
 			Si ha $\dd{\mathcal{L}}=\qty(\grad{\mathcal{L}})^{\!\!\top\bullet}\dd{\Theta}$. Allo stesso tempo, per la regola della catena: $\dd{\mathcal{L}}=\pdv{L}{X_N}\dd{X_N}=\qty(\grad{L})^{\!\top\bullet}\dd{X_N}$, e a sua volta 
 			$\dd{X_N}=\pdv{X_N}{\Theta}\dd{\Theta}$.
 		
-			Dunque $\dd{L}=\left\langle\qty(\pdv{X_N}{\Theta})^{\!\!\top}\grad{L},\dd{\Theta}\right\rangle_F$.
+			Dunque $\dd{\mathcal{L}}=\left\langle\qty(\pdv{X_N}{\Theta})^{\!\!\top}\grad{L},\dd{\Theta}\right\rangle_F$.
 			\smallskip
 			
 			La vera sfida: applicare $\qty(\pdv{X_N}{\Theta})^{\mathclap{\top}}$ a $\grad{L}$, per ottenere $\grad_{\Theta}\mathcal{L}$. Ciò corrisponde al calcolo dei \emph{path weights}.
@@ -711,7 +701,7 @@
 		\onslide<4->{Dunque $\dd h.(A)$ è la funzione $\dd{A}\mapsto\qty(h'.(A))_{\mathrm{H}}[\dd{A}]$.}
 		\medskip 
 		
-		\onslide<5->{Il particolare per il MLP, $\dd{h.}(W_iX_{i-1}+b_ie^{\top})=(\Delta_i)_{\mathrm{H}}\,\dd\qty(W_iX_i+b_ie^{\top})$}
+		\onslide<5->{Il particolare per il MLP, $\dd{h.}(W_iX_{i-1}+b_ie^{\top})=(\Delta_i)_{\mathrm{H}}\,\dd\qty(W_iX_{i-1}+b_ie^{\top})$}
 	\end{frame}
 	
 	\begin{frame}
@@ -735,7 +725,7 @@
 	\end{frame}
 	
 	\begin{frame}
-		{\hypertarget{frame:loss_derivative}{Derivata della \emph{loss}}}
+		{\hypertarget{frame:loss_derivative}{Derivata della \emph{loss} $\qquad 1/2$}}
 		{Derivata della loss rispetto ad alcuni suoi parametri}
 		%Possiamo scrivere la derivata della \emph{loss} rispetto ai parametri
 		Seguendo i \emph{path weights} direttamente sul grafo computazionale, procedendo dalla sorgente al pozzo, si ha
@@ -765,7 +755,7 @@
 		che corrisponde ad accumulare i pesi visitando il grafo al contrario.
 	\end{frame}
 		
-	\begin{frame}{Derivata della \emph{loss}}{Ricavare il gradiente dalla matrice di adiacenza}
+	\begin{frame}{Derivata della \emph{loss} $\qquad 2/2$}{Ricavare il gradiente dalla matrice di adiacenza}
 		La matrice di adiacenza del MLP ha come elementi i pesi degli archi, dunque operatori lineari. \onslide<2->{Per quanto visto, il gradiente della \emph{loss} è dato da}
 		\onslide<2->{\begin{multline*}
 			\grad{\mathcal{L}} = 
@@ -795,11 +785,17 @@
 				\\
 				\\
 				\mathcal{O}\\
-				\grad_{X_n}{L}
+				\grad_{X_N}{L}
 			\end{pNiceMatrix}	
 		\end{multline*}}
 	
 		\blankfootnote{\onslide<2->{$\mathcal{I}$: operatore identità, $\mathcal{O}$: operatore nullo}}
+	\end{frame}
+	
+
+\section{Esperimenti numerici}
+	\begin{frame}{Esperimenti numerici}{Implementazione in Julia}
+		contenuto...
 	\end{frame}
 	
 	
@@ -1236,7 +1232,7 @@
 			
 			Si ha $M_{\mathrm{H}}=\operatorname{Vec}^{-1}\circ f\circ\operatorname{Vec}$. Essendo $\operatorname{Vec}$ un'isometria, 
 			\[
-				(M_{\mathrm{H}})^{\top}=\operatorname{Vec}^{\top}\circ f^{\top}\circ\operatorname{Vec}^{-\top}=\operatorname{Vec}\circ f\circ\operatorname{Vec}^{-1}=M_{\mathrm{H}}.\qedhere
+				(M_{\mathrm{H}})^{\top}=\operatorname{Vec}^{\top}\circ f^{\top}\circ\operatorname{Vec}^{-\top}=\operatorname{Vec}^{-1}\circ f\circ\operatorname{Vec}=M_{\mathrm{H}}.\qedhere
 			\]
 		\end{proof}
 			
