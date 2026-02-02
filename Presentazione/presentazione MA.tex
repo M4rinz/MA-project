@@ -71,6 +71,13 @@
 	\let\thefootnote\svthefootnote%
 }
 
+\newcommand\algotext[1]{
+	\colorbox{gray!70}{
+		\!\includegraphics[height=0.7em]{Immagini/Julia3dots}
+		\texttt{#1}\!
+	}
+}
+
 % Rinomina i "Require" ed "Ensure" dei listings creati con algorithmicx
 \algrenewcommand\algorithmicrequire{\textbf{Input:}}
 \algrenewcommand\algorithmicensure{\textbf{Output:}}
@@ -794,8 +801,105 @@
 	
 
 \section{Esperimenti numerici}
-	\begin{frame}{Esperimenti numerici}{Implementazione in Julia}
-		contenuto...
+%	\begin{frame}{Implementazione in Julia $\qquad 1/2$}{Tipo di dato \texttt{Operator} e alcuni operatori degni di nota}
+%		Rappresentiamo una funzione lineare come un'istanza del tipo \texttt{Operator}, definito come uno \texttt{struct} con tre campi.
+%		\begin{columns}
+%			\begin{column}{0.3\textwidth}
+%				\begin{figure}[htp]
+%					\centering
+%					\includegraphics[width=\textwidth]{Immagini/Operator_declaration}
+%					\caption{\emph{Tipo di dato \texttt{Operator}}}
+%				\end{figure}
+%			\end{column}
+%			\begin{column}{0.7\textwidth}<2->
+%				\begin{figure}[htp]
+%					\centering
+%					\includegraphics[width=\textwidth]{Immagini/LRHIO_declarations}
+%					\caption{\emph{Operatori lineari}}
+%				\end{figure}
+%			\end{column}
+%		\end{columns}
+%
+%	\end{frame}
+%	
+%	\begin{frame}{Implementazione in Julia $\qquad 2/2$}{``Sovraccaricamento'' di alcune funzioni}
+%		Introduciamo alcune funzioni che ci permetteranno di implementare la backpropagation su un MLP come sostituzione all'indietro di un sistema lineare con matrici di operatori.
+%		
+%		\begin{columns}
+%			\begin{column}{0.5\textwidth}
+%				\begin{figure}
+%					\centering
+%					\includegraphics[width=\textwidth]{Immagini/overloading}
+%					\caption{\emph{Ridefinizione di funzioni che coinvolgono operatori}}
+%				\end{figure}
+%			\end{column}
+%			\begin{column}{0.5\textwidth}
+%				\begin{figure}
+%					\centering
+%					\includegraphics[width=\textwidth]{Immagini/overloading_operations}
+%				\end{figure}
+%			\end{column}
+%		\end{columns}
+%		
+%	\end{frame}
+	
+	\begin{frame}{Implementazione in Julia $\qquad 1/2$}{Overview del codice prodotto}
+		\textbf{Disclaimer}: il codice era già fornito dagli autori dell'articolo originale. \`E stato solo leggermente rimaneggiato.
+		\smallskip 
+		
+		\begin{itemize}
+			\item \algotext{Operator.jl}: introduzione del tipo di dato \texttt{Operator} $+$ alcuni operatori lineari $+$ definizione di funzioni/operazioni che coinvolgono operatori lineari
+			\item \algotext{Notebook\_esempi.ipynb}: semplici test ed esempi d'uso
+			\item \algotext{Notebook\_MLP.ipynb}: calcolo del gradiente della \emph{loss} function di un MLP tramite la risoluzione di un sistema lineare con matrici che hanno operatori come elementi {\smaller (aka backpropagation as backsubstitution)}
+		\end{itemize}
+		\medskip
+		
+		\onslide<2->{\`E stata fatta un'indagine più approfondita di alcuni problemi e alcune criticità (in Notebooks separati)}
+	\end{frame}
+	
+	\begin{frame}
+		{Implementazione in Julia $\qquad 2/2$}
+		{Calcolo dei \emph{path weights}, in pratica}
+			
+		Abbiamo visto come arrivare a definire 
+		\[
+			\grad{J} = M^{\top}\qty((I - \tilde{L}) \,\backslash\, g)
+		\]
+		e che cosa rappresenta, per il MLP.
+		\medskip
+		
+		\onslide<2->{L'espressione può essere valutata perché}
+		\begin{enumerate}
+			\item<2-> $\mathtt{g}$ è un vettore {\smaller (al netto di $\mathcal{O}$)}
+			\item<3-> $\mathtt{ImL}'$ è di tipo \texttt{Bidiagonal}, e $\backslash$ implementa la sostituzione all'indietro {\smaller (unico uso di $\backslash$: $\mathcal{I}\,\backslash\,M$ con $\mathtt{M}<:$ \texttt{Matrix})}
+			\item<4-> $\mathtt{M}'\,*\,(\dots)$ a sua volta applica una matrice di \texttt{Operator}s a un vettore con dei \texttt{Float64}
+		\end{enumerate}
+	
+	\end{frame}
+	
+	
+	\begin{frame}{In conclusione\dots}{Commenti, e possibili estensioni}
+		
+		Backpropagation $\equiv$ Calcolo dei \emph{path weights} $\equiv$ valutazione di $\mathtt{M}'\ *\ (\mathtt{ImL}' \,\backslash\, \mathtt{g})$.
+		
+		\begin{itemize}
+			\item L'articolo si propone di fare \emph{backpropagation as backsubstitution}. Il codice fornito mira strettamente a ciò, permettendo di fare poco altro
+			\item Tentando di estendere, ci si addentra ben presto in un ginepraio
+			\item Con le proprietà matematiche a disposizione, non c'è tanto di più che si può fare {\smaller (in termini di risultati ottenibili. \`E senz'altro possibile introdurre più ``regole'' anche utili)}
+		\end{itemize}
+		\medskip
+				
+		Ad esempio {\smaller (cfr. Notebooks \algotext{1\_Valutazione.ipynb} e \algotext{2\_Inversione.ipynb})}:
+		\begin{itemize}
+			\item Nella composizione di operatori mancano controlli di ammissibilità, e potrebbe ben presto diventare inefficiente
+			\item Valutare $\mathtt{M}'\ *\ (\mathtt{ImL}' \,\backslash\, \mathtt{g})$ in maniera alternativa presta il fianco a molti problemi 
+			\begin{itemize}
+				\item Inversione esplicita di una matrice di \texttt{Operators}
+				\item Moltiplicazione di matrici di \texttt{Operators}
+			\end{itemize} 
+			\item Nella pratica, avere un ordinamento topologico del DAG è \emph{fondamentale}
+		\end{itemize}
+		
 	\end{frame}
 	
 	
