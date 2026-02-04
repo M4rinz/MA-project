@@ -25,6 +25,7 @@
 \usepackage{arydshln}					% per le linee tratteggiate nelle tabelle
 
 \usepackage{nicematrix}
+\usepackage{tikz}
 
 %\usepackage[rightcaption]{sidecap}		% Per mettere le didascalie di lato
 
@@ -73,8 +74,8 @@
 
 \newcommand\algotext[1]{
 	\colorbox{gray!70}{
-		\!\includegraphics[height=0.7em]{Immagini/Julia3dots}
-		\texttt{#1}\!
+		\!\!\includegraphics[height=0.7em]{Immagini/Julia3dots}
+		\texttt{#1}\!\!
 	}
 }
 
@@ -390,9 +391,9 @@
 				\textbf{Grafo computazionale} & \textbf{Differenziazione automatica} \\
 			\midrule
 				$w(i,j)$ & Derivata parziale $\pdv{j}{i}$ {\smaller (più precisamente, $\dd i\mapsto \pdv{j}{i}\dd i$)} \\
-				Path product \newline del cammino $i\to j$ & Derivata di $j$ rispetto a $i$ \\
 				Nodo sorgente & Parametri della funzione \\
 				Nodo pozzo & Tipicamente, una \emph{loss function}\\
+				Path product \newline del cammino $i\to j$ & Derivata di $j$ rispetto a $i$ \\
 				\emph{Path weights} & Derivata della \emph{loss} rispetto ai parametri \\
 			\bottomrule
 			\end{tabular}
@@ -761,43 +762,22 @@
 		
 		che corrisponde ad accumulare i pesi visitando il grafo al contrario.
 	\end{frame}
-		
-	\begin{frame}{Derivata della \emph{loss} $\qquad 2/2$}{Ricavare il gradiente dalla matrice di adiacenza}
-		La matrice di adiacenza del MLP ha come elementi i pesi degli archi, dunque operatori lineari. \onslide<2->{Per quanto visto, il gradiente della \emph{loss} è dato da}
-		\onslide<2->{\begin{multline*}
-			\grad{\mathcal{L}} = 
-			\begin{pNiceMatrix}[nullify-dots]
-				{\Delta_1}_{\mathrm{H}}\circ{X_0}_{\mathrm{R}} & {\Delta_1}_{\mathrm{H}}\circ{e^{\!\top}}_{\mathrm{R}} & & & & \\
-				& \Ddots & \Ddots & & & \\
-				&		 & 		  & & & \\
-				&		 & 		  & & & \\
-				& & & & {\Delta_3}_{\mathrm{H}}\circ{X_2}_{\mathrm{R}} & {\Delta_3}_{\mathrm{H}}\circ{e^{\!\top}}_{\mathrm{R}}
-			\end{pNiceMatrix}^{\mathclap{\top}}\cdot\\
-			\begin{pNiceMatrix}[nullify-dots]
-				\mathcal{I} & & & & & \\
-				-{\Delta_2}_{\mathrm{H}}\circ{W_2}_{\mathrm{L}} & \mathcal{I} & & & & \\
-				&             &             &             &             & \\
-				&             &             &             &             & \\
-				&             &             &             & \mathcal{I} & \\
-				&             &             &             & -{\Delta_N}_{\mathrm{H}}\circ{W_N}_{\mathrm{L}} & \mathcal{I} \\
-				\CodeAfter
-				\tikz[loosely dotted, line width=0.8pt]
-				\draw (2-2.east) -- (5-5.north west)
-				(2-1.south) -- (6-5.north west);
-			\end{pNiceMatrix}^{\mathclap{-\!\top}}\cdot 
-			\begin{pNiceMatrix}[nullify-dots]
-				\mathcal{O}\\
-				\Vdots
-				\\
-				\\
-				\\
-				\mathcal{O}\\
-				\grad_{X_N}{L}
-			\end{pNiceMatrix}	
-		\end{multline*}}
 	
+	\begin{frame}
+		{Derivata della \emph{loss} $\qquad 2/2$}
+		{Ricavare il gradiente dalla matrice di adiacenza}
+		
+		La matrice di adiacenza del MLP ha come elementi i pesi degli archi, dunque operatori lineari. \onslide<2->{Per quanto visto, il gradiente della \emph{loss} è dato da}
+		
+		\onslide<2->{\begin{figure}
+			\centering
+			\includegraphics[width=\textwidth]{Immagini/formulone_path_weights}
+		\end{figure}}
+		
 		\blankfootnote{\onslide<2->{$\mathcal{I}$: operatore identità, $\mathcal{O}$: operatore nullo}}
 	\end{frame}
+	
+
 	
 
 \section{Esperimenti numerici}
@@ -844,8 +824,10 @@
 %	\end{frame}
 	
 	\begin{frame}{Implementazione in Julia $\qquad 1/2$}{Overview del codice prodotto}
-		\textbf{Disclaimer}: il codice era già fornito dagli autori dell'articolo originale. \`E stato solo leggermente rimaneggiato.
-		\smallskip 
+		\begin{block}{Disclaimer}
+			il codice era già fornito dagli autori dell'articolo originale. \`E stato solo leggermente rimaneggiato.
+		\end{block}
+		
 		
 		\begin{itemize}
 			\item \algotext{Operator.jl}: introduzione del tipo di dato \texttt{Operator} $+$ alcuni operatori lineari $+$ definizione di funzioni/operazioni che coinvolgono operatori lineari
@@ -854,7 +836,10 @@
 		\end{itemize}
 		\medskip
 		
-		\onslide<2->{\`E stata fatta un'indagine più approfondita di alcuni problemi e alcune criticità (in Notebooks separati)}
+%		\onslide<2->{\`E stata fatta un'indagine più approfondita di alcuni problemi e alcune criticità}% (in Notebooks separati)}
+%		\begin{itemize}
+%			\item<2-> \algotext{1\_Valutazione.ipynb}: L'ordine di  
+%		\end{itemize}
 	\end{frame}
 	
 	\begin{frame}
@@ -872,7 +857,7 @@
 		\begin{enumerate}
 			\item<2-> $\mathtt{g}$ è un vettore {\smaller (al netto di $\mathcal{O}$)}
 			\item<3-> $\mathtt{ImL}'$ è di tipo \texttt{Bidiagonal}, e $\backslash$ implementa la sostituzione all'indietro {\smaller (unico uso di $\backslash$: $\mathcal{I}\,\backslash\,M$ con $\mathtt{M}<:$ \texttt{Matrix})}
-			\item<4-> $\mathtt{M}'\,*\,(\dots)$ a sua volta applica una matrice di \texttt{Operator}s a un vettore con dei \texttt{Float64}
+			\item<4-> $\mathtt{M}'\,*\,(\dots)$ applica una matrice di \texttt{Operator}s a un vettore con dei \texttt{Float64}. Se $\mathtt{M}$ non è diagonale, va gestita la somma con uno zero {\smaller ($\equiv$ matrici nulle)} di dimensioni diverse!
 		\end{enumerate}
 	
 	\end{frame}
@@ -889,16 +874,18 @@
 		\end{itemize}
 		\medskip
 				
-		Ad esempio {\smaller (cfr. Notebooks \algotext{1\_Valutazione.ipynb} e \algotext{2\_Inversione.ipynb})}:
+		\onslide<2->{Ad \textbf{esempio} {\smaller (cfr.\algotext{Valutazione.ipynb}, \algotext{Inversione.ipynb}, \algotext{Altra\_M.ipynb})}:}
 		\begin{itemize}
-			\item Nella composizione di operatori mancano controlli di ammissibilità, e potrebbe ben presto diventare inefficiente
-			\item Valutare $\mathtt{M}'\ *\ (\mathtt{ImL}' \,\backslash\, \mathtt{g})$ in maniera alternativa presta il fianco a molti problemi 
+			\item<2-> Nella composizione di operatori mancano controlli di ammissibilità, e potrebbe ben presto diventare inefficiente
+			\item<3-> Valutare $\mathtt{M}'\ *\ (\mathtt{ImL}' \,\backslash\, \mathtt{g})$ in maniera alternativa presta il fianco a molti problemi 
 			\begin{itemize}
-				\item Inversione esplicita di una matrice di \texttt{Operators}
-				\item Moltiplicazione di matrici di \texttt{Operators}
+				\item<3-> Inversione esplicita di una matrice di \texttt{Operator}s
+				\item<3-> Moltiplicazione di matrici di \texttt{Operator}s
+				\item<3-> Somma tra matrici di dimensioni diverse, ma di cui una è nulla
 			\end{itemize} 
-			\item Nella pratica, avere un ordinamento topologico del DAG è \emph{fondamentale}
+			\item<4-> Nella pratica, avere un ordinamento topologico del DAG è \emph{fondamentale}
 		\end{itemize}
+		
 		
 	\end{frame}
 	
