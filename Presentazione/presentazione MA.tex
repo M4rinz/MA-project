@@ -665,7 +665,10 @@
 	\end{frame}
 	
 	\begin{frame}{Intermezzo: cenni di \emph{Machine Learning}}
-		\begin{block}{Remark 1:} 
+		\begin{block}{Remark 1:}
+			Il \emph{bias} viene aggiunto indipendentemente a ciascun \emph{pattern} che viene processato. Nel layer $i$ si ha: $W_iX_{i-1}\,.\!+b_i\equiv W_iX_{i-1}+B_i$, dove $B_i\coloneqq b_ie^{\top}$.
+		\end{block}
+		\begin{block}{Remark 2:} 
 			ML $\cong$ minimizzare la \emph{loss function} $\mathcal{L}(\Theta;X_0)$. {\smaller ($\Theta$ racchiude tutti i parametri del modello)}
 		
 			Esempio: $\mathcal{L}(\Theta;X_0)=\frac{1}{k}\sum_{l=1}^k\norm{X_N[:\mid\!l] - y^{(l)}}_2^2$.
@@ -675,15 +678,15 @@
 			\medskip
 		
 			Si ha $\dd{\mathcal{L}}=\qty(\grad{\mathcal{L}})^{\!\!\top\bullet}\dd{\Theta}$. Allo stesso tempo, per la regola della catena: $\dd{\mathcal{L}}=\pdv{L}{X_N}\dd{X_N}=\qty(\grad{L})^{\!\top\bullet}\dd{X_N}$, e a sua volta 
-			$\dd{X_N}=\pdv{X_N}{\Theta}\dd{\Theta}$.
+			$\dd{X_N}=\pdv{X_N}{\Theta}\dd{\Theta}$. Dunque
 		
-			Dunque $\dd{\mathcal{L}}=\left\langle\qty(\pdv{X_N}{\Theta})^{\!\!\top}\grad{L},\dd{\Theta}\right\rangle_F$.
+			$
+				\dd{\mathcal{L}}=\qty(\grad{L})^{\!\top\bullet}\pdv{X_N}{\Theta}\,\dd{\Theta}
+				\xRightarrow{\text{lemma}}\dd{\mathcal{L}}=\left\langle\qty(\pdv{X_N}{\Theta})^{\!\!\top}\grad{L},\dd{\Theta}\right\rangle_F.
+			$
 			\smallskip
 			
 			La vera sfida: applicare $\qty(\pdv{X_N}{\Theta})^{\mathclap{\top}}$ a $\grad{L}$, per ottenere $\grad_{\Theta}\mathcal{L}$. Ciò corrisponde al calcolo dei \emph{path weights}.
-		\end{block}
-		\begin{block}{Remark 2:}
-			Il \emph{bias} viene aggiunto indipendentemente a ciascun \emph{pattern} che viene processato. Nel layer $i$ si ha: $W_iX_{i-1}\,.\!+b_i\equiv W_iX_{i-1}+B_i$, dove $B_i\coloneqq b_ie^{\top}$.
 		\end{block}
 	\end{frame}
 	
@@ -825,7 +828,7 @@
 	
 	\begin{frame}{Implementazione in Julia $\qquad 1/2$}{Overview del codice prodotto}
 		\begin{block}{Disclaimer}
-			il codice era già fornito dagli autori dell'articolo originale. \`E stato solo leggermente rimaneggiato.
+			Il codice era già fornito dagli autori dell'articolo originale. \`E stato solo leggermente rimaneggiato.
 		\end{block}
 		
 		
@@ -857,7 +860,7 @@
 		\begin{enumerate}
 			\item<2-> $\mathtt{g}$ è un vettore {\smaller (al netto di $\mathcal{O}$)}
 			\item<3-> $\mathtt{ImL}'$ è di tipo \texttt{Bidiagonal}, e $\backslash$ implementa la sostituzione all'indietro {\smaller (unico uso di $\backslash$: $\mathcal{I}\,\backslash\,M$ con $\mathtt{M}<:$ \texttt{Matrix})}
-			\item<4-> $\mathtt{M}'\,*\,(\dots)$ applica una matrice di \texttt{Operator}s a un vettore con dei \texttt{Float64}. Se $\mathtt{M}$ non è diagonale, va gestita la somma con uno zero {\smaller ($\equiv$ matrici nulle)} di dimensioni diverse!
+			\item<4-> $\mathtt{M}'\,*\,(\dots)$ applica una matrice di \texttt{Operator}s a un vettore con dei \texttt{Float64}. Se $\mathtt{M}$ non è diagonale, va gestita la somma con uno zero {\smaller ($\equiv$ matrice nulla)} di dimensioni diverse!
 		\end{enumerate}
 	
 	\end{frame}
@@ -978,7 +981,7 @@
 		\[
 		\begin{dcases}
 			x_n = b_n / T_{n,n} & \\
-			x_k = \frac{1}{T_{k,k}}\smashoperator[r]{\sum_{j=k+1}^n} T_{k,j}x_k & k=n-1,\dots,1
+			x_k = b_k - \frac{1}{T_{k,k}}\smashoperator[r]{\sum_{j=k+1}^n} T_{k,j}x_k & k=n-1,\dots,1
 		\end{dcases}
 		\]
 		
@@ -986,7 +989,7 @@
 		\begin{equation}\label{eqn:backsub_ImLt}
 		\begin{dcases}
 			x_n = 1/1 = 1& \\
-			x_k = \smashoperator[lr]{\sum_{j=k+1}^n} (I-L^{\top})_{k,j}\,x_k = \smashoperator[lr]{\sum_{j=k+1}^n} (L^{\top})_{k,j}\,x_j
+			x_k = -\smashoperator[lr]{\sum_{j=k+1}^n} (I-L^{\top})_{k,j}\,x_j = \smashoperator[lr]{\sum_{j=k+1}^n} (L^{\top})_{k,j}\,x_j
 		\end{dcases}	
 		\end{equation}
 	
