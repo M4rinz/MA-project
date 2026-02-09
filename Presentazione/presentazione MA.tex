@@ -688,6 +688,8 @@
 			
 			La vera sfida: applicare $\qty(\pdv{X_N}{\Theta})^{\mathclap{\top}}$ a $\grad{L}$, per ottenere $\grad_{\Theta}\mathcal{L}$. Ciò corrisponde al calcolo dei \emph{path weights}.
 		\end{block}
+
+		\blankfootnote{$e\coloneqq (1,\dots,1)$}
 	\end{frame}
 	
 	\begin{frame}{Pesi degli archi $\qquad 1/2$}{Differenziale della funzione di attivazione}
@@ -879,7 +881,7 @@
 				
 		\onslide<2->{Ad \textbf{esempio} {\smaller (cfr.\algotext{Valutazione.ipynb}, \algotext{Inversione.ipynb}, \algotext{Altra\_M.ipynb})}:}
 		\begin{itemize}
-			\item<2-> Nella composizione di operatori mancano controlli di ammissibilità, e potrebbe ben presto diventare inefficiente
+			\item<2-> Nella composizione di operatori mancano controlli di ammissibilità; e potrebbe ben presto diventare inefficiente
 			\item<3-> Valutare $\mathtt{M}'\ *\ (\mathtt{ImL}' \,\backslash\, \mathtt{g})$ in maniera alternativa presta il fianco a molti problemi 
 			\begin{itemize}
 				\item<3-> Inversione esplicita di una matrice di \texttt{Operator}s
